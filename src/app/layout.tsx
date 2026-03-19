@@ -3,6 +3,7 @@ import { Lato, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { OrganizationSchema } from "@/components/SchemaMarkup";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lato.variable} ${cormorant.variable} antialiased`}>
+        <OrganizationSchema />
         <Header />
         <main>{children}</main>
         <Footer />

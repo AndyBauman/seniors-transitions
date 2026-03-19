@@ -5,12 +5,24 @@ const quickLinks = [
   { name: "Home", href: "/" },
   { name: "About Us", href: "/about" },
   { name: "Services", href: "/services" },
+  { name: "Resources", href: "/resources" },
+  { name: "Choosing Senior Living", href: "/choosing-senior-living" },
+];
+
+const familyLinks = [
+  { name: "For Families", href: "/for-families" },
+  { name: "Help My Parent Move", href: "/help-my-parent-move" },
+  { name: "Free Consultation", href: "/free-consultation" },
+  { name: "Downsizing Checklist", href: "/resources/downsizing-checklist" },
 ];
 
 const partnerLinks = [
-  { name: "For Families", href: "/for-families" },
-  { name: "For Placement Agents", href: "/for-placement-agents" },
-  { name: "For Communities", href: "/for-communities" },
+  { name: "For Professionals", href: "/for-professionals" },
+  { name: "Placement Agents", href: "/partners/placement-agents" },
+  { name: "Senior Living Communities", href: "/partners/senior-living-communities" },
+  { name: "Real Estate Agents", href: "/partners/real-estate-agents" },
+  { name: "Elder Law Attorneys", href: "/partners/elder-law-attorneys" },
+  { name: "Partner With Us", href: "/partner-with-us" },
 ];
 
 export default function Footer() {
@@ -27,15 +39,17 @@ export default function Footer() {
       </div>
 
       <div className="container-custom section-padding">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand */}
-          <div>
+          <div className="lg:col-span-2">
             <h3 className="font-serif text-2xl font-medium italic text-coral mb-4">
               Senior Transitions Group
             </h3>
             <p className="text-white/70 text-sm mb-6">
               Expert senior transition specialists guiding families with
-              compassion and expertise.
+              compassion and expertise. We handle placement, real estate,
+              downsizing, and move management so you can focus on what matters
+              most.
             </p>
             <div className="flex gap-4">
               <a
@@ -81,6 +95,25 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* For Families */}
+          <div>
+            <h4 className="font-serif text-lg font-semibold mb-4">
+              For Families
+            </h4>
+            <ul className="space-y-2">
+              {familyLinks.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-white/70 hover:text-coral transition-colors text-sm"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* For Partners */}
           <div>
             <h4 className="font-serif text-lg font-semibold mb-4">
@@ -99,39 +132,24 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+        </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-serif text-lg font-semibold mb-4">
-              Contact Us
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a
-                  href="tel:8007842273"
-                  className="text-white/70 hover:text-coral transition-colors"
-                >
-                  (800) 784-2273
-                </a>
-              </li>
-              <li className="text-white/70">
-                Monday - Friday: 9am - 6pm
-                <br />
-                Saturday: 10am - 4pm
-              </li>
-              <li>
-                <a
-                  href="mailto:info@seniors-transitions.com"
-                  className="text-white/70 hover:text-coral transition-colors"
-                >
-                  info@seniors-transitions.com
-                </a>
-              </li>
-            </ul>
+        {/* Contact Info Row */}
+        <div className="mt-10 pt-8 border-t border-white/20">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex flex-col sm:flex-row gap-6 text-sm text-white/70">
+              <a href="tel:8007842273" className="hover:text-coral transition-colors">
+                (800) 784-2273
+              </a>
+              <a href="mailto:info@seniors-transitions.com" className="hover:text-coral transition-colors">
+                info@seniors-transitions.com
+              </a>
+              <span>Mon-Fri: 9am-6pm • Sat: 10am-4pm</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/20">
+        <div className="mt-6 pt-6 border-t border-white/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/50 text-sm">
               © {new Date().getFullYear()} Senior Transitions Group. All rights
