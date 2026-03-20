@@ -1,32 +1,48 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Home, Users, Heart, Phone, Quote } from "lucide-react";
 
 export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section
-        className="relative bg-navy min-h-[500px] md:min-h-[600px] flex items-center"
-        style={{
-          backgroundImage: `linear-gradient(rgba(45, 62, 80, 0.55), rgba(45, 62, 80, 0.55)), url('https://images.unsplash.com/photo-1758448511533-e1502259fff6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="container-custom section-padding">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium italic mb-6">
-              Every Transition Deserves a Trusted Partner
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              We guide seniors and families through life&apos;s most significant
-              housing changes with expertise, compassion, and unwavering
-              support.
-            </p>
-            <Link href="/contact" className="btn-primary">
-              Begin the Conversation
-            </Link>
+      <section className="relative bg-navy overflow-hidden">
+        <div className="container-custom">
+          <div className="grid lg:grid-cols-2 items-center min-h-[500px] md:min-h-[600px]">
+            <div className="py-16 md:py-20 lg:py-24 lg:pr-12 text-white">
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium italic mb-6">
+                Every Transition Deserves a Trusted Partner
+              </h1>
+              <p className="text-lg md:text-xl text-white/90 mb-8 max-w-lg">
+                We guide seniors and families through life&apos;s most significant
+                housing changes with expertise, compassion, and unwavering
+                support.
+              </p>
+              <Link href="/contact" className="btn-primary">
+                Begin the Conversation
+              </Link>
+            </div>
+            <div className="relative hidden lg:block h-full min-h-[500px]">
+              <Image
+                src="/hero-collage.png"
+                alt="Senior living community — elderly couples, caregiver consultation, and assisted living building"
+                fill
+                className="object-cover object-center"
+                priority
+              />
+            </div>
           </div>
+        </div>
+        {/* Mobile: show image below text */}
+        <div className="lg:hidden">
+          <Image
+            src="/hero-collage.png"
+            alt="Senior living community — elderly couples, caregiver consultation, and assisted living building"
+            width={1200}
+            height={600}
+            className="w-full h-auto"
+            priority
+          />
         </div>
       </section>
 
