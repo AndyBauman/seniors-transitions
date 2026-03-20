@@ -1,5 +1,50 @@
 import { Users, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import FAQAccordion from "@/components/FAQAccordion";
+import { FAQSchema } from "@/components/SchemaMarkup";
+
+const faqs = [
+  {
+    question: "What types of senior living communities do you help families find?",
+    answer:
+      "We help families find the full spectrum of senior living options: Independent Living for active seniors who want maintenance-free living with social activities, Assisted Living for those who need help with daily tasks like bathing or medication management, Memory Care for seniors with Alzheimer's or dementia who need specialized supervision, Skilled Nursing for individuals who require 24-hour medical care, and Continuing Care Retirement Communities (CCRCs) that offer multiple levels of care on one campus.",
+  },
+  {
+    question: "What is the difference between independent living, assisted living, and memory care?",
+    answer:
+      "Independent Living is designed for seniors who are largely self-sufficient but want the convenience of maintenance-free living, meals, and social programming. Assisted Living provides all of that plus hands-on help with activities of daily living — bathing, dressing, medication reminders, and mobility. Memory Care is a secured, specialized form of assisted living specifically designed for people living with Alzheimer's disease, dementia, or other cognitive conditions, with trained staff and structured programs that reduce confusion and anxiety.",
+  },
+  {
+    question: "How much does your senior living placement service cost families?",
+    answer:
+      "Our placement service is completely free to families. We are compensated directly by the senior living communities when a resident moves in, similar to how a real estate agent is paid by a seller. This means you receive professional guidance, community research, tour coordination, and ongoing advocacy at no out-of-pocket cost.",
+  },
+  {
+    question: "How do you determine which senior living community is best for my loved one?",
+    answer:
+      "We start with a comprehensive needs assessment that covers medical and care requirements, daily living abilities, cognitive health, social preferences, location priorities, and budget. From there, we draw on our deep knowledge of local communities — including things that aren't on brochures, like staff-to-resident ratios, turnover rates, and resident satisfaction — to present a curated shortlist of communities that are genuinely the best fit.",
+  },
+  {
+    question: "How long does the senior living placement process usually take?",
+    answer:
+      "A typical placement takes 2 to 6 weeks from the first consultation to move-in. Urgent placements — such as after a hospital discharge or safety concern — can be expedited to just a few days. We work on your timeline, never rushing your family to make a decision before you feel confident and ready.",
+  },
+  {
+    question: "Do you accompany families on tours of senior living communities?",
+    answer:
+      "Yes, we personally accompany you on every tour. Having an experienced advocate by your side means you'll know which questions to ask, what to look for beyond the surface, and how to fairly compare communities side by side. We also provide a written comparison guide after tours to help your family make an informed decision.",
+  },
+  {
+    question: "What if my loved one doesn't adjust well after moving into a community?",
+    answer:
+      "Adjustment periods are normal — most seniors need 30 to 90 days to feel at home in a new community. We check in regularly after move-in and work closely with the community's staff to ensure your loved one is integrating well. If a community truly isn't the right fit despite best efforts, we'll help your family explore alternatives at no additional cost.",
+  },
+  {
+    question: "Can you help with a placement if my parent has been diagnosed with Alzheimer's or dementia?",
+    answer:
+      "Absolutely. Memory care placement requires specialized knowledge, and it's one of our core areas of expertise. We understand the specific licensing, staffing models, and programming that make a memory care community effective. We also help families navigate the emotional complexity of this transition and can recommend support resources for caregivers.",
+  },
+];
 
 export const metadata = {
   title: "Placement Services | Senior Transitions Group",
@@ -129,6 +174,21 @@ export default function PlacementServicesPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="bg-white">
+        <div className="container-custom section-padding">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-navy mb-4 text-center">
+              Placement Services FAQ
+            </h2>
+            <p className="text-muted-foreground text-center mb-10">
+              Common questions about finding the right senior living community
+            </p>
+            <FAQAccordion faqs={faqs} />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-navy text-white">
         <div className="container-custom section-padding">
@@ -154,6 +214,8 @@ export default function PlacementServicesPage() {
           </div>
         </div>
       </section>
+
+      <FAQSchema questions={faqs} />
     </>
   );
 }

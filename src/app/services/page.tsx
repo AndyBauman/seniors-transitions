@@ -1,5 +1,50 @@
 import { Home, Users, Heart, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import FAQAccordion from "@/components/FAQAccordion";
+import { FAQSchema } from "@/components/SchemaMarkup";
+
+const faqs = [
+  {
+    question: "What services does Senior Transitions Group offer?",
+    answer:
+      "We offer three core services that cover every aspect of senior relocation: Placement Services to help find the right senior living community, Real Estate & Downsizing to handle selling the family home and sorting belongings, and Transition Coordination for full move management from packing through settling in. Families can use all three together or any combination that fits their needs.",
+  },
+  {
+    question: "How much do your senior transition services cost?",
+    answer:
+      "Our placement services are provided at no cost to families — we are compensated by the senior living communities. Real estate services follow standard commission structures, and our direct-purchase option has no agent fees at all. Transition coordination and downsizing services are quoted based on the scope of your move. We always provide a transparent estimate before any work begins.",
+  },
+  {
+    question: "How long does a typical senior transition take from start to finish?",
+    answer:
+      "Most transitions take between 4 and 12 weeks depending on the complexity. A straightforward placement with an existing home buyer can be completed in as little as 3–4 weeks. A full-service transition — including home sale, downsizing, and coordinated move — typically takes 8–12 weeks. We customize every timeline to your family's pace and circumstances.",
+  },
+  {
+    question: "Can I use just one of your services, or do I need the full package?",
+    answer:
+      "Absolutely — our services are modular. Some families only need help finding a community, while others need downsizing support but already have a buyer for the home. We tailor our involvement to exactly what your family needs and nothing more.",
+  },
+  {
+    question: "Do you help families across the entire United States?",
+    answer:
+      "Yes. We assist families nationwide with placement services and transition coordination. Our real estate services are available in most major markets. Whether your loved one is moving across town or across the country, we have the network and expertise to help.",
+  },
+  {
+    question: "What if my parent is resistant to the idea of moving?",
+    answer:
+      "This is one of the most common situations we encounter, and we approach it with patience and empathy. Our team is experienced in having sensitive conversations about transitions. We can meet with your family, answer questions without pressure, and help your loved one understand the benefits of the move at their own pace. Many seniors feel relieved once they see the quality of communities available.",
+  },
+  {
+    question: "What makes Senior Transitions Group different from other senior moving companies?",
+    answer:
+      "Most companies only handle one piece of the puzzle — a real estate agent sells the home, a moving company moves boxes, or a placement agency finds a community. We integrate all three services under one roof so nothing falls through the cracks. Our team includes SRES-certified real estate agents, NASMM-certified move managers, and experienced placement specialists who collaborate on every transition.",
+  },
+  {
+    question: "How do I get started with Senior Transitions Group?",
+    answer:
+      "Start with a free, no-obligation consultation. You can call us at (800) 784-2273 or fill out our contact form. We'll listen to your situation, answer your questions, and recommend next steps — with zero pressure. Most families feel a sense of relief after that first conversation.",
+  },
+];
 
 export const metadata = {
   title: "Our Services | Senior Transitions Group",
@@ -180,6 +225,21 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="bg-white">
+        <div className="container-custom section-padding">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-navy mb-4 text-center">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-muted-foreground text-center mb-10">
+              Answers to the questions families ask us most about senior transitions
+            </p>
+            <FAQAccordion faqs={faqs} />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-navy text-white">
         <div className="container-custom section-padding">
@@ -197,6 +257,8 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+
+      <FAQSchema questions={faqs} />
     </>
   );
 }

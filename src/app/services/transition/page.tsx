@@ -1,5 +1,50 @@
 import { Heart, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import FAQAccordion from "@/components/FAQAccordion";
+import { FAQSchema } from "@/components/SchemaMarkup";
+
+const faqs = [
+  {
+    question: "What exactly does a senior move manager do?",
+    answer:
+      "A senior move manager oversees every logistical detail of a senior's relocation — from creating a move plan and timeline, to packing and labeling belongings, coordinating with movers, supervising load-in and delivery, unpacking and setting up the new home, and handling post-move tasks like address changes and utility transfers. The goal is to remove the logistical burden from the senior and their family so everyone can focus on the emotional side of the transition.",
+  },
+  {
+    question: "How far in advance should we start planning a senior move?",
+    answer:
+      "Ideally, 6 to 8 weeks before the desired move date. This gives us time to create a detailed plan, coordinate downsizing if needed, book movers, and prepare both the old and new residences. That said, we regularly handle urgent moves in as little as 1 to 2 weeks when a hospital discharge, safety concern, or time-sensitive community opening requires it. The sooner we're involved, the smoother the experience.",
+  },
+  {
+    question: "What is NASMM certification and why does it matter?",
+    answer:
+      "NASMM stands for the National Association of Senior & Specialty Move Managers. NASMM-certified professionals adhere to a strict code of ethics, carry appropriate insurance, and have demonstrated expertise in the unique physical, emotional, and logistical challenges of relocating older adults. Choosing a NASMM-certified move manager means you're working with a credentialed specialist — not a general moving company.",
+  },
+  {
+    question: "Will my loved one's new home feel familiar on the very first night?",
+    answer:
+      "That's exactly our goal. On move day, we set up the new residence so it feels like home before your loved one walks in — the bed is made with their own linens, family photos are placed, the bathroom is stocked, and the kitchen has essentials ready. Many families tell us their loved one couldn't believe how 'at home' the new place felt from day one.",
+  },
+  {
+    question: "Do you handle moves to all types of senior living communities?",
+    answer:
+      "Yes. We coordinate moves into independent living apartments, assisted living communities, memory care facilities, skilled nursing centers, and continuing care retirement communities. We also handle moves from one community to another, or from a senior's home into a family member's residence. Each move type has different requirements, and we tailor our approach accordingly.",
+  },
+  {
+    question: "How do you minimize stress for the senior during the move?",
+    answer:
+      "Stress reduction is built into everything we do. We keep the senior involved in decisions without burdening them with logistics. On move day, we recommend they spend the morning somewhere comfortable while our team manages the heavy lifting. We create familiar surroundings in the new home before they arrive. We also check in frequently in the days and weeks after the move to catch and address any adjustment challenges early.",
+  },
+  {
+    question: "What happens after move day — do you provide follow-up support?",
+    answer:
+      "Yes. We return within 24–48 hours to complete remaining unpacking, hang pictures, organize closets, and make any furniture adjustments. We stay in touch for several weeks afterward to ensure your loved one is settling in comfortably. If anything needs attention — a piece of furniture that isn't working in its spot, extra items to donate, or help finding local services — we're a phone call away.",
+  },
+  {
+    question: "Can you coordinate out-of-state or long-distance moves for seniors?",
+    answer:
+      "Absolutely. Long-distance moves are one of our specialties. We coordinate between the origin and destination, manage logistics with interstate movers, and can have a team member present at both ends to oversee packing and setup. For families managing a parent's move from across the country, our service is especially valuable — we serve as your trusted on-the-ground representative.",
+  },
+];
 
 export const metadata = {
   title: "Transition Coordination | Senior Transitions Group",
@@ -172,6 +217,21 @@ export default function TransitionServicesPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="bg-muted">
+        <div className="container-custom section-padding">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium text-navy mb-4 text-center">
+              Transition Coordination FAQ
+            </h2>
+            <p className="text-muted-foreground text-center mb-10">
+              Common questions about professional senior move management
+            </p>
+            <FAQAccordion faqs={faqs} />
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-navy text-white">
         <div className="container-custom section-padding">
@@ -197,6 +257,8 @@ export default function TransitionServicesPage() {
           </div>
         </div>
       </section>
+
+      <FAQSchema questions={faqs} />
     </>
   );
 }
