@@ -8,7 +8,7 @@ export default function HomePage() {
       <section
         className="relative bg-navy min-h-[500px] md:min-h-[600px] flex items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(45, 62, 80, 0.6), rgba(45, 62, 80, 0.6)), url('https://images.unsplash.com/photo-1447005497901-b3e9ee359928?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+          backgroundImage: `linear-gradient(rgba(45, 62, 80, 0.6), rgba(45, 62, 80, 0.6)), url('https://images.unsplash.com/photo-1758686253861-bbfd56e5ba7a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
