@@ -138,8 +138,8 @@ export default function Footer() {
         <div className="mt-10 pt-8 border-t border-white/20">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex flex-col sm:flex-row gap-6 text-sm text-white/70">
-              <a href="tel:8007842273" className="hover:text-coral transition-colors">
-                (800) 784-2273
+              <a href="tel:5037558555" className="hover:text-coral transition-colors">
+                (503) 755-8555
               </a>
               <a href="mailto:info@seniors-transitions.com" className="hover:text-coral transition-colors">
                 info@seniors-transitions.com

@@ -154,11 +154,11 @@ export default function PartnerWithUsPage() {
                       reach out within one business day.
                     </p>
                     <a
-                      href="tel:8007842273"
+                      href="tel:5037558555"
                       className="inline-flex items-center text-coral font-medium mt-4 hover:underline"
                     >
                       <Phone className="mr-2 h-4 w-4" />
-                      (800) 784-2273
+                      (503) 755-8555
                     </a>
                   </div>
                 ) : (
@@ -341,11 +341,11 @@ export default function PartnerWithUsPage() {
               </p>
             </div>
             <a
-              href="tel:8007842273"
+              href="tel:5037558555"
               className="inline-flex items-center justify-center px-8 py-4 bg-coral text-white font-medium text-lg rounded-sm hover:bg-coral/90 transition-colors"
             >
               <Phone className="mr-2 h-5 w-5" />
-              (800) 784-2273
+              (503) 755-8555
             </a>
           </div>
         </div>

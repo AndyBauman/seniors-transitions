@@ -102,8 +102,8 @@ export default function TermsPage() {
                     info@seniors-transitions.com
                   </a>{" "}
                   or call{" "}
-                  <a href="tel:8007842273" className="text-coral hover:underline">
-                    (800) 784-2273
+                  <a href="tel:5037558555" className="text-coral hover:underline">
+                    (503) 755-8555
                   </a>
                   .
                 </p>

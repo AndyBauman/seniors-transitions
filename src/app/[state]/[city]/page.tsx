@@ -45,7 +45,7 @@ export async function generateMetadata({
 
   return {
     title: `Senior Move Management in ${cityName}, ${stateName} | Senior Transitions Group`,
-    description: `Expert senior transition services in ${cityName}, ${stateName}. We help with senior moves, downsizing, assisted living placement, estate cleanouts, and more. Call (800) 784-2273.`,
+    description: `Expert senior transition services in ${cityName}, ${stateName}. We help with senior moves, downsizing, assisted living placement, estate cleanouts, and more. Call (503) 755-8555.`,
     keywords: [
       `senior move management ${cityName}`,
       `downsizing services ${cityName}`,
@@ -414,10 +414,10 @@ export default async function CityPage({ params }: PageProps) {
               Schedule Consultation
             </Link>
             <a
-              href="tel:+18007842273"
+              href="tel:+15037558555"
               className="border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white/10 transition-colors text-lg"
             >
-              Call (800) 784-2273
+              Call (503) 755-8555
             </a>
           </div>
         </div>

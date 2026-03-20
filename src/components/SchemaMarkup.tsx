@@ -5,7 +5,7 @@ export function OrganizationSchema() {
     name: "Senior Transitions Group",
     url: "https://seniors-transitions.com",
     logo: "https://seniors-transitions.com/logo.png",
-    telephone: "(800) 784-2273",
+    telephone: "(503) 755-8555",
     email: "info@seniors-transitions.com",
     description:
       "Expert senior transition specialists guiding families through life's most significant housing changes.",
@@ -56,7 +56,7 @@ export function ServiceSchema({
       "@type": "Organization",
       name: "Senior Transitions Group",
       url: "https://seniors-transitions.com",
-      telephone: "(800) 784-2273",
+      telephone: "(503) 755-8555",
     },
   };
 
@@ -115,7 +115,7 @@ export function LocalBusinessSchema({
     "@type": "LocalBusiness",
     name: `Senior Transitions Group – ${city}, ${state}`,
     url: "https://seniors-transitions.com",
-    telephone: "(800) 784-2273",
+    telephone: "(503) 755-8555",
     email: "info@seniors-transitions.com",
     areaServed: {
       "@type": "City",

@@ -162,7 +162,7 @@ export async function generateMetadata({
 
   return {
     title: `${serviceName} in ${cityName}, ${stateName} | Senior Transitions Group`,
-    description: `${serviceInfo?.shortDescription ?? "Professional senior transition services."} Serving ${cityName}, ${stateName}. Call (800) 784-2273 for a free consultation.`,
+    description: `${serviceInfo?.shortDescription ?? "Professional senior transition services."} Serving ${cityName}, ${stateName}. Call (503) 755-8555 for a free consultation.`,
     keywords: [
       `${serviceName.toLowerCase()} ${cityName}`,
       `senior transition services ${cityName} ${stateName}`,
@@ -322,10 +322,10 @@ export default async function ServicePage({ params }: PageProps) {
               Schedule Consultation
             </Link>
             <a
-              href="tel:+18007842273"
+              href="tel:+15037558555"
               className="border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white/10 transition-colors text-lg"
             >
-              Call (800) 784-2273
+              Call (503) 755-8555
             </a>
           </div>
           <Link

@@ -42,7 +42,7 @@ const faqs = [
   {
     question: "How do I get started with Senior Transitions Group?",
     answer:
-      "Start with a free, no-obligation consultation. You can call us at (800) 784-2273 or fill out our contact form. We'll listen to your situation, answer your questions, and recommend next steps — with zero pressure. Most families feel a sense of relief after that first conversation.",
+      "Start with a free, no-obligation consultation. You can call us at (503) 755-8555 or fill out our contact form. We'll listen to your situation, answer your questions, and recommend next steps — with zero pressure. Most families feel a sense of relief after that first conversation.",
   },
 ];
 
