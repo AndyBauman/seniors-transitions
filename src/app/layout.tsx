@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lato, Cormorant_Garamond } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -36,6 +37,32 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <Script id="statcounter-config" strategy="afterInteractive">
+          {`var sc_project=13212616; var sc_invisible=1; var sc_security="6136a1c0";`}
+        </Script>
+        <Script
+          src="https://www.statcounter.com/counter/counter.js"
+          strategy="afterInteractive"
+          async
+        />
+        <noscript>
+          <div className="statcounter">
+            <a
+              title="Web Analytics Made Easy - Statcounter"
+              href="https://statcounter.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="statcounter"
+                src="https://c.statcounter.com/13212616/0/6136a1c0/1/"
+                alt="Web Analytics Made Easy - Statcounter"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </a>
+          </div>
+        </noscript>
       </body>
     </html>
   );
