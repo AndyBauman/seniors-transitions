@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Phone, Mail, Clock, MapPin, Send } from "lucide-react";
+import { trackMetaPixelLead, trackFormStart, getUTMParams } from "@/lib/analytics";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,10 +14,25 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const formStarted = useRef(false);
+
+  const handleFormFocus = () => {
+    if (!formStarted.current) {
+      formStarted.current = true;
+      trackFormStart();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    trackMetaPixelLead({
+      service_type: formData.inquiryType,
+    });
+
+    const utmParams = getUTMParams();
+    console.log("Lead source:", utmParams);
 
     // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -159,7 +175,7 @@ export default function ContactPage() {
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6" onFocus={handleFormFocus}>
                     <div>
                       <label
                         htmlFor="name"

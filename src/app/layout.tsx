@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Lato, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { OrganizationSchema } from "@/components/SchemaMarkup";
+import { UTMCapture } from "@/components/marketing/UTMCapture";
+import { ScrollTracker } from "@/components/marketing/ScrollTracker";
+import { StickyPhoneBar } from "@/components/marketing/StickyPhoneBar";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -37,6 +41,11 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <Suspense fallback={null}>
+          <UTMCapture />
+          <ScrollTracker />
+          <StickyPhoneBar />
+        </Suspense>
         <Script id="statcounter-config" strategy="afterInteractive">
           {`var sc_project=13212616; var sc_invisible=1; var sc_security="6136a1c0";`}
         </Script>

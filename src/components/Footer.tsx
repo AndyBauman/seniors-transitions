@@ -14,6 +14,7 @@ const familyLinks = [
   { name: "Help My Parent Move", href: "/help-my-parent-move" },
   { name: "Free Consultation", href: "/free-consultation" },
   { name: "Downsizing Checklist", href: "/resources/downsizing-checklist" },
+  { name: "Refer a Family", href: "/refer" },
 ];
 
 const partnerLinks = [

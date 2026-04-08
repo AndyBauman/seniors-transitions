@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Home, Users, Heart, Phone, Quote } from "lucide-react";
+import { HowWeHelp } from "@/components/sections/HowWeHelp";
+import { UnderstandingYourOptions } from "@/components/sections/UnderstandingYourOptions";
 
 export default function HomePage() {
   return (
@@ -141,6 +143,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* How We Help */}
+      <HowWeHelp />
+
+      {/* Understanding Your Options */}
+      <UnderstandingYourOptions />
 
       {/* Who We Serve Section */}
       <section className="bg-white">
