@@ -73,11 +73,11 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="p-6 md:p-8">
-      <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+    <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8">Dashboard</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 mb-6 sm:mb-8 min-w-0">
         <StatCard
           label="Total Contacts"
           value={contacts.length}
@@ -117,26 +117,31 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
         {/* Pipeline Overview */}
-        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4 sm:p-6 min-w-0 overflow-hidden">
+          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
             Pipeline by Stage
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             {(Object.keys(STAGE_LABELS) as Array<keyof typeof STAGE_LABELS>).map(
               (stage) => (
-                <div key={stage} className="flex items-center gap-3">
-                  <div
-                    className={`w-3 h-3 rounded-full ${STAGE_COLORS[stage]}`}
-                  />
-                  <span className="text-sm text-gray-400 flex-1">
-                    {STAGE_LABELS[stage]}
-                  </span>
-                  <span className="text-sm font-medium text-white">
-                    {stageCount[stage] || 0}
-                  </span>
-                  <div className="w-24 bg-gray-700 rounded-full h-2">
+                <div
+                  key={stage}
+                  className="flex flex-col gap-2 min-w-0 sm:flex-row sm:items-center sm:gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div
+                      className={`w-3 h-3 rounded-full flex-shrink-0 ${STAGE_COLORS[stage]}`}
+                    />
+                    <span className="text-sm text-gray-400 min-w-0 truncate">
+                      {STAGE_LABELS[stage]}
+                    </span>
+                    <span className="text-sm font-medium text-white flex-shrink-0 tabular-nums">
+                      {stageCount[stage] || 0}
+                    </span>
+                  </div>
+                  <div className="w-full sm:w-24 sm:flex-shrink-0 bg-gray-700 rounded-full h-2 min-w-0">
                     <div
                       className={`h-2 rounded-full ${STAGE_COLORS[stage]}`}
                       style={{
@@ -151,16 +156,16 @@ export default function AdminDashboard() {
         </div>
 
         {/* Needs Follow-Up */}
-        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4 sm:p-6 min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-white truncate">
               Needs Follow-Up
             </h2>
             <Link
               href="/admin/contacts"
-              className="text-xs text-coral hover:underline flex items-center gap-1"
+              className="text-xs text-coral hover:underline flex items-center gap-1 flex-shrink-0 whitespace-nowrap"
             >
-              View all <ArrowRight className="w-3 h-3" />
+              View all <ArrowRight className="w-3 h-3 flex-shrink-0" />
             </Link>
           </div>
           {needsFollowUp.length === 0 ? (
@@ -171,24 +176,30 @@ export default function AdminDashboard() {
                 <Link
                   key={contact.id}
                   href={`/admin/contacts/${contact.id}`}
-                  className="flex items-center gap-3 p-3 rounded bg-[#0f1419] hover:bg-white/5 transition-colors"
+                  className="flex items-start sm:items-center gap-3 p-3 rounded bg-[#0f1419] hover:bg-white/5 transition-colors min-w-0"
                 >
-                  <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-xs font-medium text-orange-400">
+                  <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-xs font-medium text-orange-400 flex-shrink-0">
                     {contact.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white truncate">
                       {contact.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 line-clamp-2 break-words">
                       {CONTACT_TYPE_LABELS[contact.type]} •{" "}
                       {contact.organization}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-red-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {getDaysSince(contact.nextFollowUp)}d overdue
+                  <div className="flex-shrink-0 text-right">
+                    <p
+                      className="text-[11px] sm:text-xs text-red-400 flex items-center justify-end gap-0.5 sm:gap-1 whitespace-nowrap"
+                      title={`${getDaysSince(contact.nextFollowUp)} days overdue`}
+                    >
+                      <Clock className="w-3 h-3 flex-shrink-0 hidden sm:block" />
+                      <span>
+                        {getDaysSince(contact.nextFollowUp)}d
+                        <span className="hidden sm:inline"> overdue</span>
+                      </span>
                     </p>
                   </div>
                 </Link>
@@ -198,16 +209,16 @@ export default function AdminDashboard() {
         </div>
 
         {/* Upcoming Tasks */}
-        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4 sm:p-6 min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+            <h2 className="text-base sm:text-lg font-semibold text-white truncate">
               Upcoming Tasks
             </h2>
             <Link
               href="/admin/tasks"
-              className="text-xs text-coral hover:underline flex items-center gap-1"
+              className="text-xs text-coral hover:underline flex items-center gap-1 flex-shrink-0 whitespace-nowrap"
             >
-              View all <ArrowRight className="w-3 h-3" />
+              View all <ArrowRight className="w-3 h-3 flex-shrink-0" />
             </Link>
           </div>
           {[...overdueTasks, ...todayTasks, ...upcomingTasks].length === 0 ? (
@@ -219,10 +230,10 @@ export default function AdminDashboard() {
                 .map((task) => (
                   <div
                     key={task.id}
-                    className="flex items-center gap-3 p-3 rounded bg-[#0f1419]"
+                    className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 rounded bg-[#0f1419] min-w-0"
                   >
                     <div
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 sm:mt-0 ${
                         task.priority === "high"
                           ? "bg-red-500"
                           : task.priority === "medium"
@@ -231,15 +242,21 @@ export default function AdminDashboard() {
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">
+                      <p className="text-sm text-white break-words line-clamp-2 sm:truncate sm:line-clamp-none">
                         {task.title}
                       </p>
                     </div>
                     <span
-                      className={`text-xs ${isOverdue(task.dueDate) ? "text-red-400" : "text-gray-500"}`}
+                      className={`text-[11px] sm:text-xs flex-shrink-0 whitespace-nowrap text-right ${isOverdue(task.dueDate) ? "text-red-400" : "text-gray-500"}`}
+                      title={task.dueDate}
                     >
                       {isOverdue(task.dueDate)
-                        ? `${getDaysSince(task.dueDate)}d overdue`
+                        ? (
+                          <>
+                            {getDaysSince(task.dueDate)}d
+                            <span className="hidden sm:inline"> overdue</span>
+                          </>
+                        )
                         : task.dueDate === new Date().toISOString().split("T")[0]
                           ? "Today"
                           : task.dueDate}
@@ -251,8 +268,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Contacts */}
-        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4 sm:p-6 min-w-0 overflow-hidden">
+          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
             Recently Added
           </h2>
           <div className="space-y-3">
@@ -267,10 +284,10 @@ export default function AdminDashboard() {
                 <Link
                   key={contact.id}
                   href={`/admin/contacts/${contact.id}`}
-                  className="flex items-center gap-3 p-3 rounded bg-[#0f1419] hover:bg-white/5 transition-colors"
+                  className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 rounded bg-[#0f1419] hover:bg-white/5 transition-colors min-w-0"
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
                       contact.type === "placement-agent"
                         ? "bg-cyan-500/20 text-cyan-400"
                         : contact.type === "executive-director"
@@ -286,16 +303,16 @@ export default function AdminDashboard() {
                     <p className="text-sm text-white truncate">
                       {contact.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 truncate">
                       {CONTACT_TYPE_LABELS[contact.type]}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 flex-shrink-0 max-w-[40%] sm:max-w-none justify-end">
                     {contact.verified && (
-                      <CheckCircle2 className="w-3 h-3 text-green-400" />
+                      <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0 hidden sm:block" />
                     )}
                     <span
-                      className={`text-xs px-2 py-0.5 rounded ${STAGE_COLORS[contact.stage]} text-white`}
+                      className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded truncate max-w-full ${STAGE_COLORS[contact.stage]} text-white`}
                     >
                       {STAGE_LABELS[contact.stage]}
                     </span>
@@ -324,13 +341,13 @@ function StatCard({
 }) {
   return (
     <div
-      className={`bg-[#1a2332] rounded-lg border ${color} p-4`}
+      className={`bg-[#1a2332] rounded-lg border ${color} p-3 sm:p-4 min-w-0 overflow-hidden`}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-500 uppercase tracking-wide">
+      <div className="flex items-center justify-between gap-1 mb-2 min-w-0">
+        <span className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-wide leading-tight line-clamp-2">
           {label}
         </span>
-        {icon}
+        <span className="flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5">{icon}</span>
       </div>
       <p className="text-2xl font-bold text-white">{value}</p>
       {subtitle && (

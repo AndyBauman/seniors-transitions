@@ -116,7 +116,7 @@ export default function ContactDetailPage() {
   const daysSince = getDaysSince(contact.lastContacted);
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl">
+    <div className="p-3 sm:p-6 md:p-8 max-w-4xl min-w-0 w-full">
       <Link
         href="/admin/contacts"
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 mb-6 transition-colors"

@@ -57,10 +57,10 @@ export default function PipelinePage() {
   };
 
   return (
-    <div className="p-6 md:p-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Pipeline</h1>
+    <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Pipeline</h1>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1 min-w-0 overscroll-x-contain">
         {STAGES.map((stage) => {
           const stageContacts = contacts.filter((c) => c.stage === stage);
           return (

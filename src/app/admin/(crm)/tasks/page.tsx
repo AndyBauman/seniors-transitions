@@ -67,7 +67,7 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Tasks</h1>
         <button

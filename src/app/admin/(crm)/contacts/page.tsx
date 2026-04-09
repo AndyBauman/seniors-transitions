@@ -99,7 +99,7 @@ function ContactsContent() {
   const unverifiedCount = filtered.filter((c) => !c.verified).length;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
