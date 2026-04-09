@@ -27,10 +27,12 @@ export default function HomePage() {
             <div className="relative hidden lg:block h-full min-h-[500px]">
               <Image
                 src="/hero-collage.png"
-                alt="Senior living community — elderly couples, caregiver consultation, and assisted living building"
+                alt="Seniors and families, a trusted transition advisor, and home — representing compassionate senior living guidance"
                 fill
                 className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, min(55vw, 960px)"
                 priority
+                unoptimized
               />
             </div>
           </div>
@@ -39,11 +41,13 @@ export default function HomePage() {
         <div className="lg:hidden">
           <Image
             src="/hero-collage.png"
-            alt="Senior living community — elderly couples, caregiver consultation, and assisted living building"
-            width={1200}
-            height={600}
-            className="w-full h-auto"
+            alt="Seniors and families, a trusted transition advisor, and home — representing compassionate senior living guidance"
+            width={1024}
+            height={917}
+            className="w-full h-auto max-w-[1024px] mx-auto"
+            sizes="100vw"
             priority
+            unoptimized
           />
         </div>
       </section>
