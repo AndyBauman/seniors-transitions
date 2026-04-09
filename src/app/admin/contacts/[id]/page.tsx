@@ -13,6 +13,12 @@ import {
   CalendarDays,
   Save,
   Trash2,
+  CheckCircle2,
+  Globe,
+  MapPin,
+  ExternalLink,
+  ShieldCheck,
+  ShieldX,
 } from "lucide-react";
 import {
   getContact,
@@ -86,6 +92,27 @@ export default function ContactDetailPage() {
     });
   };
 
+  const handleToggleVerified = () => {
+    const newVerified = !contact.verified;
+    const newDate = newVerified
+      ? new Date().toISOString().split("T")[0]
+      : null;
+    updateContact(contact.id, {
+      verified: newVerified,
+      verifiedDate: newDate,
+    });
+    setContact({
+      ...contact,
+      verified: newVerified,
+      verifiedDate: newDate,
+    });
+    setForm({
+      ...form,
+      verified: newVerified,
+      verifiedDate: newDate,
+    });
+  };
+
   const daysSince = getDaysSince(contact.lastContacted);
 
   return (
@@ -125,13 +152,18 @@ export default function ContactDetailPage() {
               {contact.starred && (
                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
               )}
+              {contact.verified && (
+                <span className="flex items-center gap-1 text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded font-medium">
+                  <CheckCircle2 className="w-3 h-3" /> VERIFIED
+                </span>
+              )}
             </div>
             <p className="text-gray-400 text-sm">
               {contact.title}
               {contact.title && contact.organization && " • "}
               {contact.organization}
             </p>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span
                 className={`text-xs px-2 py-0.5 rounded ${STAGE_COLORS[contact.stage]} text-white`}
               >
@@ -140,10 +172,34 @@ export default function ContactDetailPage() {
               <span className="text-xs text-gray-500">
                 {CONTACT_TYPE_LABELS[contact.type]}
               </span>
+              {(contact.city || contact.state) && (
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {[contact.city, contact.state].filter(Boolean).join(", ")}
+                </span>
+              )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleToggleVerified}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded border transition-colors ${
+              contact.verified
+                ? "bg-green-600/10 border-green-600/30 text-green-400 hover:bg-green-600/20"
+                : "bg-red-600/10 border-red-600/30 text-red-400 hover:bg-red-600/20"
+            }`}
+          >
+            {contact.verified ? (
+              <>
+                <ShieldCheck className="w-3 h-3" /> Verified
+              </>
+            ) : (
+              <>
+                <ShieldX className="w-3 h-3" /> Unverified
+              </>
+            )}
+          </button>
           <button
             onClick={handleMarkContacted}
             className="flex items-center gap-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-medium px-3 py-2 rounded transition-colors"
@@ -160,25 +216,47 @@ export default function ContactDetailPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Contact Info & Last Contacted */}
+        {/* Left Column */}
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4 space-y-3">
             <h3 className="text-sm font-semibold text-white">Contact Info</h3>
-            <a
-              href={`tel:${contact.phone}`}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-coral transition-colors"
-            >
-              <Phone className="w-4 h-4" /> {contact.phone}
-            </a>
-            <a
-              href={`mailto:${contact.email}`}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-coral transition-colors"
-            >
-              <Mail className="w-4 h-4" /> {contact.email}
-            </a>
+            {contact.phone && (
+              <a
+                href={`tel:${contact.phone.split(";")[0].trim().replace(/[^0-9]/g, "")}`}
+                className="flex items-center gap-2 text-sm text-gray-400 hover:text-coral transition-colors"
+              >
+                <Phone className="w-4 h-4" /> {contact.phone}
+              </a>
+            )}
+            {contact.email && (
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex items-center gap-2 text-sm text-gray-400 hover:text-coral transition-colors"
+              >
+                <Mail className="w-4 h-4" /> {contact.email}
+              </a>
+            )}
             {contact.organization && (
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <Building className="w-4 h-4" /> {contact.organization}
+              </div>
+            )}
+            {contact.website && (
+              <a
+                href={`https://${contact.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                <Globe className="w-4 h-4" />
+                {contact.website}
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+            {(contact.city || contact.state) && (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <MapPin className="w-4 h-4" />
+                {[contact.city, contact.state].filter(Boolean).join(", ")}
               </div>
             )}
           </div>
@@ -222,9 +300,52 @@ export default function ContactDetailPage() {
               </span>
             </div>
           </div>
+
+          {/* Verification Status */}
+          <div className={`rounded-lg border p-4 ${
+            contact.verified
+              ? "bg-green-500/5 border-green-500/20"
+              : "bg-red-500/5 border-red-500/20"
+          }`}>
+            <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+              {contact.verified ? (
+                <ShieldCheck className="w-4 h-4 text-green-400" />
+              ) : (
+                <ShieldX className="w-4 h-4 text-red-400" />
+              )}
+              Verification Status
+            </h3>
+            <p className={`text-xs ${contact.verified ? "text-green-400" : "text-red-400"}`}>
+              {contact.verified
+                ? `Verified on ${contact.verifiedDate}`
+                : "Not yet verified — info may be outdated"}
+            </p>
+            <p className="text-[10px] text-gray-600 mt-1">
+              Confirm phone, website, and business status are current.
+            </p>
+          </div>
+
+          {/* Placement Targets */}
+          {contact.placementTargets && (
+            <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-4">
+              <h3 className="text-sm font-semibold text-white mb-2">
+                Placement Targets
+              </h3>
+              <div className="flex flex-wrap gap-1.5">
+                {contact.placementTargets.split(";").map((target, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded"
+                  >
+                    {target.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Edit Form / Notes */}
+        {/* Right Column */}
         <div className="lg:col-span-2">
           {editing ? (
             <div className="bg-[#1a2332] rounded-lg border border-gray-700/50 p-6 space-y-4">
@@ -289,12 +410,45 @@ export default function ContactDetailPage() {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-xs text-gray-400 mb-1">City</label>
+                  <input
+                    value={form.city || ""}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">State</label>
+                  <input
+                    value={form.state || ""}
+                    onChange={(e) => setForm({ ...form, state: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Website</label>
+                  <input
+                    value={form.website || ""}
+                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                    className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+                  />
+                </div>
+                <div>
                   <label className="block text-xs text-gray-400 mb-1">Next Follow-Up</label>
                   <input
                     type="date"
                     value={form.nextFollowUp || ""}
                     onChange={(e) => setForm({ ...form, nextFollowUp: e.target.value })}
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-xs text-gray-400 mb-1">Placement Targets</label>
+                  <input
+                    value={form.placementTargets || ""}
+                    onChange={(e) => setForm({ ...form, placementTargets: e.target.value })}
+                    placeholder="e.g. Assisted living; memory care; adult care homes"
+                    className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>

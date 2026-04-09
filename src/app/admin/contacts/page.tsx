@@ -12,10 +12,15 @@ import {
   Clock,
   AlertCircle,
   X,
+  CheckCircle2,
+  Globe,
+  MapPin,
+  ExternalLink,
 } from "lucide-react";
 import {
   getContacts,
   saveContact,
+  updateContact,
   deleteContact,
   Contact,
   ContactType,
@@ -42,6 +47,8 @@ function ContactsContent() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [verifiedFilter, setVerifiedFilter] = useState<"all" | "verified" | "unverified">("all");
+  const [stateFilter, setStateFilter] = useState<string>("all");
 
   const refresh = useCallback(() => {
     let all = getContacts();
@@ -53,12 +60,21 @@ function ContactsContent() {
     refresh();
   }, [refresh]);
 
-  const filtered = contacts.filter(
-    (c) =>
+  const states = [...new Set(contacts.map((c) => c.state).filter(Boolean))].sort();
+
+  const filtered = contacts.filter((c) => {
+    const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.organization.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase())
-  );
+      c.email.toLowerCase().includes(search.toLowerCase()) ||
+      c.city.toLowerCase().includes(search.toLowerCase());
+    const matchesVerified =
+      verifiedFilter === "all" ||
+      (verifiedFilter === "verified" && c.verified) ||
+      (verifiedFilter === "unverified" && !c.verified);
+    const matchesState = stateFilter === "all" || c.state === stateFilter;
+    return matchesSearch && matchesVerified && matchesState;
+  });
 
   const handleDelete = (id: string) => {
     if (confirm("Delete this contact?")) {
@@ -67,14 +83,30 @@ function ContactsContent() {
     }
   };
 
+  const toggleVerified = (id: string, current: boolean) => {
+    updateContact(id, {
+      verified: !current,
+      verifiedDate: !current ? new Date().toISOString().split("T")[0] : null,
+    });
+    refresh();
+  };
+
   const pageTitle = typeFilter
     ? CONTACT_TYPE_LABELS[typeFilter] + "s"
     : "All Contacts";
 
+  const verifiedCount = filtered.filter((c) => c.verified).length;
+  const unverifiedCount = filtered.filter((c) => !c.verified).length;
+
   return (
     <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
+          <p className="text-xs text-gray-500 mt-1">
+            {filtered.length} contacts • {verifiedCount} verified • {unverifiedCount} unverified
+          </p>
+        </div>
         <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 bg-coral hover:bg-coral/90 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
@@ -83,16 +115,39 @@ function ContactsContent() {
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search contacts..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-[#1a2332] border border-gray-700/50 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-coral/50"
-        />
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search by name, org, email, city..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-[#1a2332] border border-gray-700/50 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-coral/50"
+          />
+        </div>
+        <select
+          value={verifiedFilter}
+          onChange={(e) => setVerifiedFilter(e.target.value as typeof verifiedFilter)}
+          className="px-3 py-2.5 bg-[#1a2332] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+        >
+          <option value="all">All Status</option>
+          <option value="verified">Verified Only</option>
+          <option value="unverified">Unverified Only</option>
+        </select>
+        {states.length > 1 && (
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="px-3 py-2.5 bg-[#1a2332] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+          >
+            <option value="all">All States</option>
+            {states.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Table */}
@@ -101,28 +156,31 @@ function ContactsContent() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-700/50">
+                <th className="w-10 px-3 py-3">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-gray-600" />
+                </th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide">
                   Contact
                 </th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide">
-                  Organization
-                </th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide hidden md:table-cell">
-                  Type
+                  Location
                 </th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide hidden lg:table-cell">
                   Stage
                 </th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide hidden lg:table-cell">
-                  Last Contacted
+                  Last Contact
                 </th>
                 <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide hidden xl:table-cell">
                   Follow-Up
                 </th>
-                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide">
+                <th className="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wide hidden xl:table-cell">
+                  Website
+                </th>
+                <th className="px-3 py-3 text-xs text-gray-500 uppercase tracking-wide">
                   Score
                 </th>
-                <th className="px-4 py-3"></th>
+                <th className="px-3 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -135,6 +193,22 @@ function ContactsContent() {
                     key={contact.id}
                     className="border-b border-gray-700/30 hover:bg-white/5 transition-colors"
                   >
+                    {/* Verified Checkbox */}
+                    <td className="px-3 py-3 text-center">
+                      <button
+                        onClick={() => toggleVerified(contact.id, contact.verified)}
+                        title={contact.verified ? `Verified ${contact.verifiedDate || ""}` : "Mark as verified"}
+                        className="group"
+                      >
+                        <CheckCircle2
+                          className={`w-4 h-4 transition-colors ${
+                            contact.verified
+                              ? "text-green-400 fill-green-400/20"
+                              : "text-gray-700 group-hover:text-gray-500"
+                          }`}
+                        />
+                      </button>
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/contacts/${contact.id}`}
@@ -144,29 +218,42 @@ function ContactsContent() {
                           <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 flex-shrink-0" />
                         )}
                         <div>
-                          <p className="text-sm text-white font-medium hover:text-coral transition-colors">
-                            {contact.name}
-                          </p>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              {contact.phone}
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center gap-1 hidden sm:flex">
-                              <Mail className="w-3 h-3" />
-                              {contact.email}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-white font-medium hover:text-coral transition-colors">
+                              {contact.name}
+                            </p>
+                            {contact.verified && (
+                              <span className="text-[10px] text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded font-medium">
+                                VERIFIED
+                              </span>
+                            )}
                           </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-gray-500">
+                              {contact.organization || CONTACT_TYPE_LABELS[contact.type]}
+                            </span>
+                            {contact.phone && (
+                              <span className="text-xs text-gray-600 flex items-center gap-0.5">
+                                <Phone className="w-2.5 h-2.5" />
+                                {contact.phone.split(";")[0].trim()}
+                              </span>
+                            )}
+                          </div>
+                          {contact.placementTargets && (
+                            <p className="text-[10px] text-gray-600 mt-0.5 truncate max-w-xs">
+                              {contact.placementTargets}
+                            </p>
+                          )}
                         </div>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
-                      {contact.organization}
-                    </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-xs text-gray-400">
-                        {CONTACT_TYPE_LABELS[contact.type]}
-                      </span>
+                      {(contact.city || contact.state) && (
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {[contact.city, contact.state].filter(Boolean).join(", ")}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <span
@@ -201,27 +288,39 @@ function ContactsContent() {
                         <span className="text-xs text-gray-600">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                          <span
-                            className={`text-xs font-bold ${
-                              contact.score >= 80
-                                ? "text-green-400"
-                                : contact.score >= 60
-                                  ? "text-yellow-400"
-                                  : "text-gray-400"
-                            }`}
-                          >
-                            {contact.score}
-                          </span>
-                        </div>
-                      </div>
+                    <td className="px-4 py-3 hidden xl:table-cell">
+                      {contact.website ? (
+                        <a
+                          href={`https://${contact.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 truncate max-w-[140px]"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                          {contact.website.replace(/^(https?:\/\/)?(www\.)?/, "")}
+                        </a>
+                      ) : (
+                        <span className="text-xs text-gray-700">—</span>
+                      )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 text-center">
+                      <span
+                        className={`text-xs font-bold ${
+                          contact.score >= 80
+                            ? "text-green-400"
+                            : contact.score >= 60
+                              ? "text-yellow-400"
+                              : "text-gray-500"
+                        }`}
+                      >
+                        {contact.score}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3">
                       <button
                         onClick={() => handleDelete(contact.id)}
-                        className="text-gray-600 hover:text-red-400 transition-colors"
+                        className="text-gray-700 hover:text-red-400 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -232,7 +331,7 @@ function ContactsContent() {
               {filtered.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-4 py-8 text-center text-gray-500 text-sm"
                   >
                     No contacts found.
@@ -244,7 +343,6 @@ function ContactsContent() {
         </div>
       </div>
 
-      {/* Add Contact Modal */}
       {showAddModal && (
         <AddContactModal
           defaultType={typeFilter}
@@ -276,6 +374,10 @@ function AddContactModal({
     organization: "",
     title: "",
     notes: "",
+    website: "",
+    city: "",
+    state: "OR",
+    placementTargets: "",
     stage: "new-lead" as PipelineStage,
   });
 
@@ -287,6 +389,8 @@ function AddContactModal({
       nextFollowUp: null,
       score: 50,
       starred: false,
+      verified: false,
+      verifiedDate: null,
     });
     onSave();
   };
@@ -362,6 +466,41 @@ function AddContactModal({
                 className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">City</label>
+              <input
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">State</label>
+              <input
+                value={form.state}
+                onChange={(e) => setForm({ ...form, state: e.target.value })}
+                className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Website</label>
+              <input
+                value={form.website}
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
+                className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Placement Targets</label>
+            <input
+              value={form.placementTargets}
+              onChange={(e) => setForm({ ...form, placementTargets: e.target.value })}
+              placeholder="e.g. Assisted living; memory care; adult care homes"
+              className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-coral/50"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Stage</label>

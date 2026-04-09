@@ -10,6 +10,8 @@ import {
   ArrowRight,
   Phone,
   Clock,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import {
   getContacts,
@@ -50,6 +52,9 @@ export default function AdminDashboard() {
       !isOverdue(t.dueDate) &&
       t.dueDate !== new Date().toISOString().split("T")[0]
   );
+
+  const verifiedContacts = contacts.filter((c) => c.verified);
+  const unverifiedContacts = contacts.filter((c) => !c.verified);
 
   const contactsByType = {
     "placement-agent": contacts.filter((c) => c.type === "placement-agent"),
@@ -98,16 +103,17 @@ export default function AdminDashboard() {
           color="border-cyan-500/30"
         />
         <StatCard
+          label="Verified"
+          value={verifiedContacts.length}
+          icon={<ShieldCheck className="w-5 h-5 text-green-400" />}
+          color="border-green-500/30"
+          subtitle={`${unverifiedContacts.length} unverified`}
+        />
+        <StatCard
           label="Needs Follow-Up"
           value={needsFollowUp.length}
           icon={<Phone className="w-5 h-5 text-orange-400" />}
           color="border-orange-500/30"
-        />
-        <StatCard
-          label="Overdue Tasks"
-          value={overdueTasks.length}
-          icon={<AlertTriangle className="w-5 h-5 text-red-400" />}
-          color="border-red-500/30"
         />
       </div>
 
@@ -284,11 +290,16 @@ export default function AdminDashboard() {
                       {CONTACT_TYPE_LABELS[contact.type]}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded ${STAGE_COLORS[contact.stage]} text-white`}
-                  >
-                    {STAGE_LABELS[contact.stage]}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {contact.verified && (
+                      <CheckCircle2 className="w-3 h-3 text-green-400" />
+                    )}
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${STAGE_COLORS[contact.stage]} text-white`}
+                    >
+                      {STAGE_LABELS[contact.stage]}
+                    </span>
+                  </div>
                 </Link>
               ))}
           </div>
@@ -303,11 +314,13 @@ function StatCard({
   value,
   icon,
   color,
+  subtitle,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
   color: string;
+  subtitle?: string;
 }) {
   return (
     <div
@@ -320,6 +333,9 @@ function StatCard({
         {icon}
       </div>
       <p className="text-2xl font-bold text-white">{value}</p>
+      {subtitle && (
+        <p className="text-[10px] text-gray-600 mt-0.5">{subtitle}</p>
+      )}
     </div>
   );
 }

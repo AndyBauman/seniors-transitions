@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   Star,
-  Phone,
   Clock,
+  CheckCircle2,
+  MapPin,
 } from "lucide-react";
 import {
   getContacts,
@@ -149,14 +150,25 @@ function PipelineCard({
         )}
       </div>
 
-      <p className="text-xs text-gray-500 mb-2 truncate">
+      <p className="text-xs text-gray-500 mb-1 truncate">
         {contact.organization}
       </p>
+      {(contact.city || contact.state) && (
+        <p className="text-[10px] text-gray-600 mb-2 flex items-center gap-0.5">
+          <MapPin className="w-2.5 h-2.5" />
+          {[contact.city, contact.state].filter(Boolean).join(", ")}
+        </p>
+      )}
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-600">
-          {CONTACT_TYPE_LABELS[contact.type]}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {contact.verified && (
+            <CheckCircle2 className="w-3 h-3 text-green-400" />
+          )}
+          <span className="text-xs text-gray-600">
+            {CONTACT_TYPE_LABELS[contact.type]}
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           {daysSince !== null && (
             <span
