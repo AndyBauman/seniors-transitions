@@ -1,3 +1,14 @@
+import { websiteDedupeKey } from "./website-utils";
+import {
+  USER_EXPANSION,
+  ASRPWA_ADVISOR_SEED,
+  IDAHO_PLACEMENT_SEED,
+  COMMUNITY_SEED,
+  ATTORNEY_SEED,
+  PARTNER_DIRECTORY_IMPORT,
+  type SeedContact,
+} from "./crm-seed-batches";
+
 export type ContactType =
   | "placement-agent"
   | "executive-director"
@@ -53,7 +64,171 @@ export interface Task {
 const CONTACTS_KEY = "stg_crm_contacts";
 const TASKS_KEY = "stg_crm_tasks";
 const SEED_VERSION_KEY = "stg_crm_seed_version";
-const CURRENT_SEED_VERSION = 2;
+const CURRENT_SEED_VERSION = 7;
+
+function mergePhones(a: string, b: string): string {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of `${a};${b}`.split(";")) {
+    const t = part.trim();
+    if (!t) continue;
+    const key = t.replace(/\D/g, "");
+    if (key.length < 10) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t);
+  }
+  return out.join("; ");
+}
+
+function preferCity(x: string, y: string): string {
+  const bad = (s: string) => !s?.trim() || /^unspecified$/i.test(s.trim());
+  const xt = (x || "").trim();
+  const yt = (y || "").trim();
+  if (bad(yt)) return xt || yt;
+  if (bad(xt)) return yt || xt;
+  if (/\bCounty\b/i.test(xt) && !/\bCounty\b/i.test(yt)) return yt;
+  return xt || yt;
+}
+
+function mergeSeedContacts(existing: SeedContact, incoming: SeedContact): SeedContact {
+  return {
+    ...existing,
+    name: incoming.name.length > existing.name.length ? incoming.name : existing.name,
+    phone: mergePhones(existing.phone, incoming.phone),
+    notes: [existing.notes, incoming.notes].filter(Boolean).join(" | "),
+    placementTargets:
+      (existing.placementTargets?.length ?? 0) >= (incoming.placementTargets?.length ?? 0)
+        ? existing.placementTargets
+        : incoming.placementTargets,
+    website: existing.website || incoming.website,
+    city: preferCity(existing.city, incoming.city),
+    state: existing.state || incoming.state,
+    email: existing.email || incoming.email,
+    title: existing.title || incoming.title,
+    organization:
+      existing.organization.length > incoming.organization.length
+        ? existing.organization
+        : incoming.organization,
+    type: existing.type,
+    stage: existing.stage,
+    lastContacted: existing.lastContacted ?? incoming.lastContacted,
+    score: Math.max(existing.score, incoming.score),
+    starred: existing.starred || incoming.starred,
+    verified: existing.verified || incoming.verified,
+    verifiedDate: existing.verifiedDate ?? incoming.verifiedDate,
+    nextFollowUp: existing.nextFollowUp || incoming.nextFollowUp,
+  };
+}
+
+function seedDedupeKey(c: SeedContact): string {
+  const w = websiteDedupeKey(c.website);
+  if (w) return `w:${w}`;
+  const digits = (c.phone.split(";")[0] ?? "").replace(/\D/g, "");
+  if (digits.length >= 10) return `p:${digits.slice(-10)}`;
+  return `n:${c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 96)}`;
+}
+
+function dedupeSeedContacts(list: SeedContact[]): SeedContact[] {
+  const map = new Map<string, SeedContact>();
+  for (const c of list) {
+    const k = seedDedupeKey(c);
+    const ex = map.get(k);
+    if (!ex) map.set(k, { ...c });
+    else map.set(k, mergeSeedContacts(ex, c));
+  }
+  return [...map.values()];
+}
+
+function contactAsSeed(c: Contact): SeedContact {
+  return {
+    name: c.name,
+    email: c.email,
+    phone: c.phone,
+    type: c.type,
+    organization: c.organization,
+    title: c.title,
+    notes: c.notes,
+    website: c.website ?? "",
+    city: c.city ?? "",
+    state: c.state ?? "",
+    placementTargets: c.placementTargets ?? "",
+    stage: c.stage,
+    lastContacted: c.lastContacted,
+    nextFollowUp: c.nextFollowUp ?? "",
+    score: c.score,
+    starred: c.starred,
+    verified: c.verified ?? false,
+    verifiedDate: c.verifiedDate ?? null,
+  };
+}
+
+function mergeNotesForStorage(a: string, b: string): string {
+  const at = (a ?? "").trim();
+  const bt = (b ?? "").trim();
+  if (!bt) return at;
+  if (!at) return bt;
+  if (at.includes(bt) || bt.includes(at)) return at.length >= bt.length ? at : bt;
+  return `${at} | ${bt}`;
+}
+
+function mergeStorageContactWithCanonical(existing: Contact, seed: SeedContact): Contact {
+  return {
+    ...existing,
+    name: seed.name.length > existing.name.length ? seed.name : existing.name,
+    phone: mergePhones(existing.phone, seed.phone),
+    notes: mergeNotesForStorage(existing.notes, seed.notes),
+    email: existing.email || seed.email,
+    website: existing.website || seed.website,
+    city: preferCity(existing.city, seed.city),
+    state: existing.state || seed.state,
+    placementTargets:
+      (existing.placementTargets?.length ?? 0) >= (seed.placementTargets?.length ?? 0)
+        ? existing.placementTargets
+        : seed.placementTargets,
+    title: existing.title || seed.title,
+    organization:
+      existing.organization.length >= seed.organization.length
+        ? existing.organization
+        : seed.organization,
+    verified: existing.verified || seed.verified,
+    verifiedDate: existing.verifiedDate ?? seed.verifiedDate,
+  };
+}
+
+function mergeCanonicalIntoExistingContacts(
+  canonical: SeedContact[],
+  daysFromNow: (n: number) => string,
+  existingList: Contact[]
+): Contact[] {
+  const keyToIndex = new Map<string, number>();
+  existingList.forEach((c, i) => {
+    const k = seedDedupeKey(contactAsSeed(c));
+    if (!keyToIndex.has(k)) keyToIndex.set(k, i);
+  });
+
+  const out = [...existingList];
+  const defaultFollowUp = daysFromNow(7);
+
+  for (const seed of canonical) {
+    const k = seedDedupeKey(seed);
+    const idx = keyToIndex.get(k);
+    if (idx !== undefined) {
+      out[idx] = mergeStorageContactWithCanonical(out[idx], seed);
+    } else {
+      const fresh: Contact = {
+        ...seed,
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        nextFollowUp: seed.nextFollowUp?.trim() ? seed.nextFollowUp : defaultFollowUp,
+      };
+      keyToIndex.set(k, out.length);
+      out.push(fresh);
+    }
+  }
+
+  return out;
+}
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
@@ -147,23 +322,10 @@ export function deleteTask(id: string): void {
 
 // --- Seed Data ---
 
-export function seedIfEmpty(): void {
-  if (typeof window === "undefined") return;
-  const version = localStorage.getItem(SEED_VERSION_KEY);
-  if (version && parseInt(version) >= CURRENT_SEED_VERSION) return;
-
-  const today = new Date();
-  const daysAgo = (n: number) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - n);
-    return d.toISOString().split("T")[0];
-  };
-  const daysFromNow = (n: number) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + n);
-    return d.toISOString().split("T")[0];
-  };
-
+function buildCanonicalSeedRows(
+  daysAgo: (n: number) => string,
+  daysFromNow: (n: number) => string
+): SeedContact[] {
   // =========================================================
   // Real Oregon & SW Washington Placement Agents
   // =========================================================
@@ -590,64 +752,165 @@ export function seedIfEmpty(): void {
     },
   ];
 
-  const sampleContacts = [...placementAgents, ...otherContacts];
-  localStorage.setItem(CONTACTS_KEY, JSON.stringify(sampleContacts));
+  const stripForSeed = (c: Contact): SeedContact => {
+    const { id, createdAt, ...rest } = c;
+    return {
+      ...rest,
+      nextFollowUp: c.nextFollowUp ?? "",
+    };
+  };
 
-  const sampleTasks: Task[] = [
-    {
-      id: generateId(),
-      title: "Call Patricia Williams — new family lead",
-      description: "Mom needs AL placement. Home in Beaverton. Reach out ASAP.",
-      dueDate: daysFromNow(0),
-      completed: false,
-      contactId: otherContacts[6].id,
-      priority: "high",
-      createdAt: daysAgo(1),
-    },
-    {
-      id: generateId(),
-      title: "Re-engage Brookdale Beaverton",
-      description: "Last contact was 30 days ago. Check on availability and pricing updates.",
-      dueDate: daysAgo(2),
-      completed: false,
-      contactId: otherContacts[4].id,
-      priority: "high",
-      createdAt: daysAgo(5),
-    },
-    {
-      id: generateId(),
-      title: "Begin outreach to Portland metro placement agents",
-      description: "37 new placement agents loaded. Start with Adult Placement Network, A Graceful Transition, Care and Keeping — they have the most detailed placement targets.",
-      dueDate: daysFromNow(1),
-      completed: false,
-      contactId: null,
-      priority: "high",
-      createdAt: daysAgo(0),
-    },
-    {
-      id: generateId(),
-      title: "Verify info for CarePatrol agencies",
-      description: "Three CarePatrol locations loaded (NE Portland, Beaverton, Portland South). Confirm advisor names, phone numbers, and active status.",
-      dueDate: daysFromNow(3),
-      completed: false,
-      contactId: null,
-      priority: "medium",
-      createdAt: daysAgo(0),
-    },
-    {
-      id: generateId(),
-      title: "Tour at Silver Leaf with Mark Johnson",
-      description: "Walk the campus. Discuss referral process.",
-      dueDate: daysFromNow(4),
-      completed: false,
-      contactId: otherContacts[2].id,
-      priority: "medium",
-      createdAt: daysAgo(1),
-    },
-  ];
+  return dedupeSeedContacts([
+    ...placementAgents.map(stripForSeed),
+    ...USER_EXPANSION,
+    ...ASRPWA_ADVISOR_SEED,
+    ...IDAHO_PLACEMENT_SEED,
+    ...COMMUNITY_SEED,
+    ...ATTORNEY_SEED,
+    ...PARTNER_DIRECTORY_IMPORT,
+    ...otherContacts.map(stripForSeed),
+  ]);
+}
 
-  localStorage.setItem(TASKS_KEY, JSON.stringify(sampleTasks));
-  localStorage.setItem(SEED_VERSION_KEY, CURRENT_SEED_VERSION.toString());
+export function seedIfEmpty(): void {
+  if (typeof window === "undefined") return;
+  const versionStr = localStorage.getItem(SEED_VERSION_KEY);
+  const parsedVersion = versionStr ? parseInt(versionStr, 10) : 0;
+  if (parsedVersion >= CURRENT_SEED_VERSION) return;
+
+  const today = new Date();
+  const daysAgo = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString().split("T")[0];
+  };
+  const daysFromNow = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  };
+
+  const canonical = buildCanonicalSeedRows(daysAgo, daysFromNow);
+  const existing = getContacts();
+
+  if (existing.length === 0) {
+    const sampleContacts: Contact[] = canonical.map((row, i) => ({
+      ...row,
+      id: generateId(),
+      createdAt: daysAgo((i % 90) + 1),
+      nextFollowUp: row.nextFollowUp?.trim()
+        ? row.nextFollowUp
+        : daysFromNow((i % 18) + 2),
+    }));
+
+    localStorage.setItem(CONTACTS_KEY, JSON.stringify(sampleContacts));
+
+    const findContactId = (needle: string) =>
+      sampleContacts.find((c) => c.name.includes(needle))?.id ?? null;
+
+    const sampleTasks: Task[] = [
+      {
+        id: generateId(),
+        title: "Call Patricia Williams — new family lead",
+        description: "Mom needs AL placement. Home in Beaverton. Reach out ASAP.",
+        dueDate: daysFromNow(0),
+        completed: false,
+        contactId: findContactId("Patricia Williams"),
+        priority: "high",
+        createdAt: daysAgo(1),
+      },
+      {
+        id: generateId(),
+        title: "Re-engage Brookdale Beaverton",
+        description: "Last contact was 30 days ago. Check on availability and pricing updates.",
+        dueDate: daysAgo(2),
+        completed: false,
+        contactId: findContactId("Brookdale Beaverton"),
+        priority: "high",
+        createdAt: daysAgo(5),
+      },
+      {
+        id: generateId(),
+        title: "Begin outreach to Portland metro placement agents",
+        description: "Prioritize verified placement partners; use networks column for placement focus.",
+        dueDate: daysFromNow(1),
+        completed: false,
+        contactId: null,
+        priority: "high",
+        createdAt: daysAgo(0),
+      },
+      {
+        id: generateId(),
+        title: "Verify info for CarePatrol agencies",
+        description: "Multiple CarePatrol territories (NE Portland, Beaverton, Portland South, Vancouver). Confirm advisors and phones.",
+        dueDate: daysFromNow(3),
+        completed: false,
+        contactId: null,
+        priority: "medium",
+        createdAt: daysAgo(0),
+      },
+      {
+        id: generateId(),
+        title: "Tour at Silver Leaf with Mark Johnson",
+        description: "Walk the campus. Discuss referral process.",
+        dueDate: daysFromNow(4),
+        completed: false,
+        contactId: findContactId("Silver Leaf"),
+        priority: "medium",
+        createdAt: daysAgo(1),
+      },
+    ];
+
+    localStorage.setItem(TASKS_KEY, JSON.stringify(sampleTasks));
+  } else {
+    const merged = mergeCanonicalIntoExistingContacts(
+      canonical,
+      daysFromNow,
+      existing
+    );
+    localStorage.setItem(CONTACTS_KEY, JSON.stringify(merged));
+  }
+
+  localStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));
+}
+
+/**
+ * Re-merge canonical directory rows from this app bundle into localStorage.
+ * Run after a deploy (or any time) to pick up new seed data without clearing the CRM.
+ * Preserves contact IDs and tasks; adds new orgs; enriches matches by website/phone/name key.
+ */
+export function syncDirectoryContactsFromBundle(): {
+  previousCount: number;
+  nextCount: number;
+} {
+  if (typeof window === "undefined") {
+    return { previousCount: 0, nextCount: 0 };
+  }
+  const today = new Date();
+  const daysAgo = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString().split("T")[0];
+  };
+  const daysFromNow = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  };
+  const canonical = buildCanonicalSeedRows(daysAgo, daysFromNow);
+  const existing = getContacts();
+  const merged = mergeCanonicalIntoExistingContacts(
+    canonical,
+    daysFromNow,
+    existing
+  );
+  localStorage.setItem(CONTACTS_KEY, JSON.stringify(merged));
+  localStorage.setItem(SEED_VERSION_KEY, String(CURRENT_SEED_VERSION));
+  return { previousCount: existing.length, nextCount: merged.length };
+}
+
+export function getCrmSeedVersion(): number {
+  return CURRENT_SEED_VERSION;
 }
 
 // --- Helpers ---

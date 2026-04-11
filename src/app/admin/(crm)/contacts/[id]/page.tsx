@@ -19,11 +19,12 @@ import {
   ExternalLink,
   ShieldCheck,
   ShieldX,
+  RefreshCw,
 } from "lucide-react";
 import {
   getContact,
-  updateContact,
-  deleteContact,
+  updateContact as localUpdateContact,
+  deleteContact as localDeleteContact,
   Contact,
   ContactType,
   PipelineStage,
@@ -32,6 +33,13 @@ import {
   STAGE_COLORS,
   getDaysSince,
 } from "@/lib/crm-store";
+import {
+  fetchContact,
+  apiUpdateContact,
+  apiDeleteContact,
+  isApiAvailable,
+} from "@/lib/crm-api";
+import { websiteHref, stripWebsiteProtocol } from "@/lib/website-utils";
 
 export default function ContactDetailPage() {
   const params = useParams();
@@ -40,77 +48,133 @@ export default function ContactDetailPage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Partial<Contact>>({});
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [useApi, setUseApi] = useState(false);
 
   useEffect(() => {
-    const c = getContact(params.id as string);
-    if (c) {
-      setContact(c);
-      setForm(c);
-    }
+    const id = params.id as string;
+    isApiAvailable().then(async (ok) => {
+      setUseApi(ok);
+      if (ok) {
+        try {
+          const c = await fetchContact(id);
+          if (c) {
+            setContact(c);
+            setForm(c);
+          }
+        } catch {
+          const c = getContact(id);
+          if (c) {
+            setContact(c);
+            setForm(c);
+          }
+        }
+      } else {
+        const c = getContact(id);
+        if (c) {
+          setContact(c);
+          setForm(c);
+        }
+      }
+      setLoading(false);
+    });
   }, [params.id]);
 
-  if (!contact) {
+  if (loading) {
     return (
-      <div className="p-8 text-gray-500">Contact not found.</div>
+      <div className="p-8 text-gray-500 flex items-center gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin" /> Loading contact…
+      </div>
     );
   }
 
-  const handleSave = () => {
-    updateContact(contact.id, form);
-    setContact({ ...contact, ...form } as Contact);
+  if (!contact) {
+    return <div className="p-8 text-gray-500">Contact not found.</div>;
+  }
+
+  const handleSave = async () => {
+    try {
+      if (useApi) {
+        const updated = await apiUpdateContact(contact.id, form);
+        setContact(updated);
+      } else {
+        localUpdateContact(contact.id, form);
+        setContact({ ...contact, ...form } as Contact);
+      }
+    } catch {
+      localUpdateContact(contact.id, form);
+      setContact({ ...contact, ...form } as Contact);
+    }
     setEditing(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleDelete = () => {
-    if (confirm("Delete this contact permanently?")) {
-      deleteContact(contact.id);
-      router.push("/admin/contacts");
+  const handleDelete = async () => {
+    if (!confirm("Delete this contact permanently?")) return;
+    try {
+      if (useApi) await apiDeleteContact(contact.id);
+      else localDeleteContact(contact.id);
+    } catch {
+      localDeleteContact(contact.id);
     }
+    router.push("/admin/contacts");
   };
 
-  const handleMarkContacted = () => {
+  const handleMarkContacted = async () => {
     const today = new Date().toISOString().split("T")[0];
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 14);
     const next = nextWeek.toISOString().split("T")[0];
 
-    updateContact(contact.id, {
+    const updates = {
       lastContacted: today,
       nextFollowUp: next,
-    });
-    setContact({
-      ...contact,
-      lastContacted: today,
-      nextFollowUp: next,
-    });
-    setForm({
-      ...form,
-      lastContacted: today,
-      nextFollowUp: next,
-    });
+      stage: "contacted" as PipelineStage,
+    };
+
+    try {
+      if (useApi) {
+        const updated = await apiUpdateContact(contact.id, updates);
+        setContact(updated);
+        setForm({ ...form, ...updates });
+      } else {
+        localUpdateContact(contact.id, updates);
+        setContact({ ...contact, ...updates });
+        setForm({ ...form, ...updates });
+      }
+    } catch {
+      localUpdateContact(contact.id, updates);
+      setContact({ ...contact, ...updates });
+      setForm({ ...form, ...updates });
+    }
   };
 
-  const handleToggleVerified = () => {
+  const handleToggleVerified = async () => {
     const newVerified = !contact.verified;
     const newDate = newVerified
       ? new Date().toISOString().split("T")[0]
       : null;
-    updateContact(contact.id, {
+    const updates = {
       verified: newVerified,
       verifiedDate: newDate,
-    });
-    setContact({
-      ...contact,
-      verified: newVerified,
-      verifiedDate: newDate,
-    });
-    setForm({
-      ...form,
-      verified: newVerified,
-      verifiedDate: newDate,
-    });
+    };
+
+    try {
+      if (useApi) {
+        const updated = await apiUpdateContact(contact.id, updates);
+        setContact(updated);
+        setForm({ ...form, ...updates });
+      } else {
+        localUpdateContact(contact.id, updates);
+        setContact({ ...contact, ...updates });
+        setForm({ ...form, ...updates });
+      }
+    } catch {
+      localUpdateContact(contact.id, updates);
+      setContact({ ...contact, ...updates });
+      setForm({ ...form, ...updates });
+    }
   };
 
   const daysSince = getDaysSince(contact.lastContacted);
@@ -243,14 +307,14 @@ export default function ContactDetailPage() {
             )}
             {contact.website && (
               <a
-                href={`https://${contact.website}`}
+                href={websiteHref(contact.website)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors break-all"
               >
-                <Globe className="w-4 h-4" />
-                {contact.website}
-                <ExternalLink className="w-3 h-3" />
+                <Globe className="w-4 h-4 flex-shrink-0" />
+                {stripWebsiteProtocol(contact.website)}
+                <ExternalLink className="w-3 h-3 flex-shrink-0" />
               </a>
             )}
             {(contact.city || contact.state) && (
@@ -302,11 +366,13 @@ export default function ContactDetailPage() {
           </div>
 
           {/* Verification Status */}
-          <div className={`rounded-lg border p-4 ${
-            contact.verified
-              ? "bg-green-500/5 border-green-500/20"
-              : "bg-red-500/5 border-red-500/20"
-          }`}>
+          <div
+            className={`rounded-lg border p-4 ${
+              contact.verified
+                ? "bg-green-500/5 border-green-500/20"
+                : "bg-red-500/5 border-red-500/20"
+            }`}
+          >
             <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
               {contact.verified ? (
                 <ShieldCheck className="w-4 h-4 text-green-400" />
@@ -315,7 +381,9 @@ export default function ContactDetailPage() {
               )}
               Verification Status
             </h3>
-            <p className={`text-xs ${contact.verified ? "text-green-400" : "text-red-400"}`}>
+            <p
+              className={`text-xs ${contact.verified ? "text-green-400" : "text-red-400"}`}
+            >
               {contact.verified
                 ? `Verified on ${contact.verifiedDate}`
                 : "Not yet verified — info may be outdated"}
@@ -354,7 +422,9 @@ export default function ContactDetailPage() {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Name</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Name
+                  </label>
                   <input
                     value={form.name || ""}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -362,55 +432,87 @@ export default function ContactDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Organization</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Organization
+                  </label>
                   <input
                     value={form.organization || ""}
-                    onChange={(e) => setForm({ ...form, organization: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, organization: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Email</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Email
+                  </label>
                   <input
                     value={form.email || ""}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, email: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Phone</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Phone
+                  </label>
                   <input
                     value={form.phone || ""}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, phone: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Type</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Type
+                  </label>
                   <select
                     value={form.type || ""}
-                    onChange={(e) => setForm({ ...form, type: e.target.value as ContactType })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        type: e.target.value as ContactType,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   >
                     {Object.entries(CONTACT_TYPE_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
+                      <option key={k} value={k}>
+                        {v}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Stage</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Stage
+                  </label>
                   <select
                     value={form.stage || ""}
-                    onChange={(e) => setForm({ ...form, stage: e.target.value as PipelineStage })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        stage: e.target.value as PipelineStage,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   >
                     {Object.entries(STAGE_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
+                      <option key={k} value={k}>
+                        {v}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">City</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    City
+                  </label>
                   <input
                     value={form.city || ""}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -418,53 +520,75 @@ export default function ContactDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">State</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    State
+                  </label>
                   <input
                     value={form.state || ""}
-                    onChange={(e) => setForm({ ...form, state: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, state: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Website</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Website
+                  </label>
                   <input
                     value={form.website || ""}
-                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, website: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Next Follow-Up</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Next Follow-Up
+                  </label>
                   <input
                     type="date"
                     value={form.nextFollowUp || ""}
-                    onChange={(e) => setForm({ ...form, nextFollowUp: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, nextFollowUp: e.target.value })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1">Placement Targets</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Placement Targets
+                  </label>
                   <input
                     value={form.placementTargets || ""}
-                    onChange={(e) => setForm({ ...form, placementTargets: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, placementTargets: e.target.value })
+                    }
                     placeholder="e.g. Assisted living; memory care; adult care homes"
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-coral/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Score</label>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Score
+                  </label>
                   <input
                     type="number"
                     min={0}
                     max={100}
                     value={form.score || 0}
-                    onChange={(e) => setForm({ ...form, score: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setForm({ ...form, score: parseInt(e.target.value) })
+                    }
                     className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700/50 rounded text-sm text-white focus:outline-none focus:border-coral/50"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Notes</label>
+                <label className="block text-xs text-gray-400 mb-1">
+                  Notes
+                </label>
                 <textarea
                   rows={4}
                   value={form.notes || ""}
