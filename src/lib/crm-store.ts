@@ -913,6 +913,11 @@ export function getCrmSeedVersion(): number {
   return CURRENT_SEED_VERSION;
 }
 
+/** Stable key for matching a contact across devices (website → phone → name). */
+export function contactDedupeKey(contact: Contact): string {
+  return seedDedupeKey(contactAsSeed(contact));
+}
+
 // --- Helpers ---
 
 export const CONTACT_TYPE_LABELS: Record<ContactType, string> = {

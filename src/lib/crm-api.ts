@@ -1,4 +1,9 @@
-import type { Contact, ContactType, PipelineStage } from "./crm-store";
+import {
+  contactDedupeKey,
+  type Contact,
+  type ContactType,
+  type PipelineStage,
+} from "./crm-store";
 
 export interface DbContact {
   id: string;
@@ -141,4 +146,59 @@ export async function isApiAvailable(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function normDate(a: string | null | undefined): string {
+  return (a ?? "").trim();
+}
+
+/**
+ * Push workflow fields from this browser's localStorage copy into Supabase.
+ * Use on the device where you made edits (e.g. phone) so desktop sees the same verified / contacted state.
+ */
+export async function mergeLocalContactsIntoCloud(
+  localContacts: Contact[]
+): Promise<{ matched: number; updated: number; skipped: number }> {
+  const remote = await fetchContacts();
+  const byKey = new Map<string, Contact>();
+  for (const r of remote) {
+    byKey.set(contactDedupeKey(r), r);
+  }
+
+  let matched = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  for (const local of localContacts) {
+    const key = contactDedupeKey(local);
+    const server = byKey.get(key);
+    if (!server) {
+      skipped++;
+      continue;
+    }
+    matched++;
+
+    const updates: Partial<Contact> = {};
+    if (local.verified !== server.verified) updates.verified = local.verified;
+    if (normDate(local.verifiedDate) !== normDate(server.verifiedDate)) {
+      updates.verifiedDate = local.verifiedDate;
+    }
+    if (normDate(local.lastContacted) !== normDate(server.lastContacted)) {
+      updates.lastContacted = local.lastContacted;
+    }
+    if (normDate(local.nextFollowUp) !== normDate(server.nextFollowUp)) {
+      updates.nextFollowUp = local.nextFollowUp;
+    }
+    if (local.stage !== server.stage) updates.stage = local.stage;
+    if (local.starred !== server.starred) updates.starred = local.starred;
+    if (local.score !== server.score) updates.score = local.score;
+
+    if (Object.keys(updates).length === 0) continue;
+
+    await apiUpdateContact(server.id, updates);
+    updated++;
+    byKey.set(key, { ...server, ...updates });
+  }
+
+  return { matched, updated, skipped };
 }

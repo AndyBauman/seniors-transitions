@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   ExternalLink,
   RefreshCw,
+  CloudUpload,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
@@ -43,6 +44,7 @@ import {
   apiDeleteContact,
   apiSeedContacts,
   isApiAvailable,
+  mergeLocalContactsIntoCloud,
 } from "@/lib/crm-api";
 import { websiteHref, stripWebsiteProtocol } from "@/lib/website-utils";
 
@@ -88,6 +90,7 @@ function ContactsContent() {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [showFilters, setShowFilters] = useState(false);
+  const [mergingFromDevice, setMergingFromDevice] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -281,6 +284,37 @@ function ContactsContent() {
     ? CONTACT_TYPE_LABELS[typeFilter] + "s"
     : "All Contacts";
 
+  const handlePushFromThisDevice = async () => {
+    const local = getContacts();
+    if (local.length === 0) {
+      alert(
+        "This browser has no CRM data in local storage. Open this page on the phone where you made changes, then tap this button there."
+      );
+      return;
+    }
+    if (
+      !confirm(
+        "Upload verified, contacted, stage, follow-up, and starred changes from this browser to the cloud? Use this on the device where you edited contacts (for example your phone). Desktop will match after you refresh."
+      )
+    )
+      return;
+    setMergingFromDevice(true);
+    try {
+      const { matched, updated, skipped } =
+        await mergeLocalContactsIntoCloud(local);
+      await refresh();
+      alert(
+        `Cloud updated: ${updated} contact(s) changed (${matched} matched to cloud rows). ${skipped} local row(s) had no cloud match and were skipped.`
+      );
+    } catch (e) {
+      alert(
+        e instanceof Error ? e.message : "Upload failed. Check your connection."
+      );
+    } finally {
+      setMergingFromDevice(false);
+    }
+  };
+
   const handleSyncDirectory = async () => {
     if (
       !confirm(
@@ -355,6 +389,20 @@ function ContactsContent() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 justify-end">
+          {useApi && (
+            <button
+              type="button"
+              onClick={handlePushFromThisDevice}
+              disabled={mergingFromDevice}
+              title="If you edited contacts on another device before cloud sync, open this page on that device once and tap here to copy those changes to Supabase."
+              className="flex items-center gap-2 border border-amber-600/50 hover:border-amber-500/70 text-amber-100 text-sm font-medium px-3 py-2 rounded transition-colors disabled:opacity-50"
+            >
+              <CloudUpload
+                className={`w-4 h-4 ${mergingFromDevice ? "animate-pulse" : ""}`}
+              />
+              Push from this device
+            </button>
+          )}
           <button
             type="button"
             onClick={handleSyncDirectory}
