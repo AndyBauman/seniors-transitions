@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   ExternalLink,
   RefreshCw,
-  CloudUpload,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
@@ -44,7 +43,6 @@ import {
   apiDeleteContact,
   apiSeedContacts,
   isApiAvailable,
-  mergeLocalContactsIntoCloud,
 } from "@/lib/crm-api";
 import { websiteHref, stripWebsiteProtocol } from "@/lib/website-utils";
 
@@ -90,11 +88,14 @@ function ContactsContent() {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [showFilters, setShowFilters] = useState(false);
-  const [mergingFromDevice, setMergingFromDevice] = useState(false);
 
-  const refresh = useCallback(async () => {
+  const loadContacts = useCallback(async () => {
+    setLoading(true);
     try {
-      if (useApi) {
+      const apiOk = await isApiAvailable();
+      setUseApi(apiOk);
+      if (apiOk) {
+        await apiSeedContacts().catch(() => {});
         let all = await fetchContacts();
         if (typeFilter) all = all.filter((c) => c.type === typeFilter);
         setContacts(all);
@@ -104,26 +105,50 @@ function ContactsContent() {
         setContacts(all);
       }
     } catch {
+      setUseApi(false);
       let all = getContacts();
       if (typeFilter) all = all.filter((c) => c.type === typeFilter);
       setContacts(all);
+      alert(
+        "Could not reach the contact database. Showing data stored in this browser only."
+      );
     } finally {
       setLoading(false);
+    }
+  }, [typeFilter]);
+
+  useEffect(() => {
+    void loadContacts();
+  }, [loadContacts]);
+
+  const refresh = useCallback(async () => {
+    if (!useApi) {
+      let all = getContacts();
+      if (typeFilter) all = all.filter((c) => c.type === typeFilter);
+      setContacts(all);
+      return;
+    }
+    try {
+      let all = await fetchContacts();
+      if (typeFilter) all = all.filter((c) => c.type === typeFilter);
+      setContacts(all);
+    } catch {
+      /* keep current list */
     }
   }, [typeFilter, useApi]);
 
   useEffect(() => {
-    isApiAvailable().then((ok) => {
-      setUseApi(ok);
-      if (ok) {
-        apiSeedContacts().catch(() => {});
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (!useApi) return;
+    const refetch = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", refetch);
+    window.addEventListener("focus", refetch);
+    return () => {
+      document.removeEventListener("visibilitychange", refetch);
+      window.removeEventListener("focus", refetch);
+    };
+  }, [useApi, refresh]);
 
   const states = useMemo(
     () =>
@@ -259,10 +284,13 @@ function ContactsContent() {
     try {
       if (useApi) await apiDeleteContact(id);
       else localDeleteContact(id);
-      refresh();
+      await refresh();
     } catch {
-      localDeleteContact(id);
-      refresh();
+      alert(
+        useApi
+          ? "Could not delete on the server. Check your connection."
+          : "Could not delete."
+      );
     }
   };
 
@@ -274,46 +302,19 @@ function ContactsContent() {
     try {
       if (useApi) await apiUpdateContact(id, updates);
       else localUpdateContact(id, updates);
+      await refresh();
     } catch {
-      localUpdateContact(id, updates);
+      alert(
+        useApi
+          ? "Could not save. Check your connection and try again."
+          : "Could not save."
+      );
     }
-    refresh();
   };
 
   const pageTitle = typeFilter
     ? CONTACT_TYPE_LABELS[typeFilter] + "s"
     : "All Contacts";
-
-  const handlePushFromThisDevice = async () => {
-    const local = getContacts();
-    if (local.length === 0) {
-      alert(
-        "This browser has no CRM data in local storage. Open this page on the phone where you made changes, then tap this button there."
-      );
-      return;
-    }
-    if (
-      !confirm(
-        "Upload verified, contacted, stage, follow-up, and starred changes from this browser to the cloud? Use this on the device where you edited contacts (for example your phone). Desktop will match after you refresh."
-      )
-    )
-      return;
-    setMergingFromDevice(true);
-    try {
-      const { matched, updated, skipped } =
-        await mergeLocalContactsIntoCloud(local);
-      await refresh();
-      alert(
-        `Cloud updated: ${updated} contact(s) changed (${matched} matched to cloud rows). ${skipped} local row(s) had no cloud match and were skipped.`
-      );
-    } catch (e) {
-      alert(
-        e instanceof Error ? e.message : "Upload failed. Check your connection."
-      );
-    } finally {
-      setMergingFromDevice(false);
-    }
-  };
 
   const handleSyncDirectory = async () => {
     if (
@@ -324,16 +325,11 @@ function ContactsContent() {
       return;
     setSyncingDirectory(true);
     try {
-      if (!useApi) {
-        const { previousCount, nextCount } = syncDirectoryContactsFromBundle();
-        refresh();
-        alert(
-          `Directory sync complete. Contacts: ${previousCount} → ${nextCount}.`
-        );
-      } else {
-        alert("Sync is handled server-side with Supabase. Try refreshing.");
-        refresh();
-      }
+      const { previousCount, nextCount } = syncDirectoryContactsFromBundle();
+      await refresh();
+      alert(
+        `Directory sync complete. Contacts: ${previousCount} → ${nextCount}.`
+      );
     } finally {
       setSyncingDirectory(false);
     }
@@ -384,37 +380,25 @@ function ContactsContent() {
             {filtered.length} contacts • {verifiedCount} verified •{" "}
             {unverifiedCount} unverified
             {useApi && (
-              <span className="ml-2 text-green-500">● synced</span>
+              <span className="ml-2 text-green-500">● cloud</span>
             )}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 justify-end">
-          {useApi && (
+          {!useApi && (
             <button
               type="button"
-              onClick={handlePushFromThisDevice}
-              disabled={mergingFromDevice}
-              title="If you edited contacts on another device before cloud sync, open this page on that device once and tap here to copy those changes to Supabase."
-              className="flex items-center gap-2 border border-amber-600/50 hover:border-amber-500/70 text-amber-100 text-sm font-medium px-3 py-2 rounded transition-colors disabled:opacity-50"
+              onClick={handleSyncDirectory}
+              disabled={syncingDirectory}
+              title={`Merge directory data shipped with this build (seed v${getCrmSeedVersion()}). Cloud mode uses the database automatically.`}
+              className="flex items-center gap-2 border border-gray-600 hover:border-gray-500 text-gray-200 text-sm font-medium px-3 py-2 rounded transition-colors disabled:opacity-50"
             >
-              <CloudUpload
-                className={`w-4 h-4 ${mergingFromDevice ? "animate-pulse" : ""}`}
+              <RefreshCw
+                className={`w-4 h-4 ${syncingDirectory ? "animate-spin" : ""}`}
               />
-              Push from this device
+              Sync directory
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleSyncDirectory}
-            disabled={syncingDirectory}
-            title={`Merge directory data shipped with this build (seed v${getCrmSeedVersion()}). Use after deploy if counts look stale.`}
-            className="flex items-center gap-2 border border-gray-600 hover:border-gray-500 text-gray-200 text-sm font-medium px-3 py-2 rounded transition-colors disabled:opacity-50"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${syncingDirectory ? "animate-spin" : ""}`}
-            />
-            Sync directory
-          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 bg-coral hover:bg-coral/90 text-white text-sm font-medium px-4 py-2 rounded transition-colors"
@@ -931,16 +915,20 @@ function AddContactModal({
       else localSaveContact(contact);
       onSave();
     } catch {
-      localSaveContact({
-        ...form,
-        lastContacted: null,
-        nextFollowUp: null,
-        score: 50,
-        starred: false,
-        verified: false,
-        verifiedDate: null,
-      });
-      onSave();
+      if (useApi) {
+        alert("Could not save to the database. Check your connection.");
+      } else {
+        localSaveContact({
+          ...form,
+          lastContacted: null,
+          nextFollowUp: null,
+          score: 50,
+          starred: false,
+          verified: false,
+          verifiedDate: null,
+        });
+        onSave();
+      }
     } finally {
       setSaving(false);
     }

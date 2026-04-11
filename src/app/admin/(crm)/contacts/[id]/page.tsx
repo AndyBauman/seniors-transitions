@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -50,23 +50,27 @@ export default function ContactDetailPage() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(false);
+  const editingRef = useRef(false);
+  editingRef.current = editing;
 
   useEffect(() => {
     const id = params.id as string;
-    isApiAvailable().then(async (ok) => {
+    let cancelled = false;
+    (async () => {
+      const ok = await isApiAvailable();
+      if (cancelled) return;
       setUseApi(ok);
       if (ok) {
         try {
           const c = await fetchContact(id);
+          if (cancelled) return;
           if (c) {
             setContact(c);
             setForm(c);
           }
         } catch {
-          const c = getContact(id);
-          if (c) {
-            setContact(c);
-            setForm(c);
+          if (!cancelled) {
+            alert("Could not load this contact from the database.");
           }
         }
       } else {
@@ -76,9 +80,31 @@ export default function ContactDetailPage() {
           setForm(c);
         }
       }
-      setLoading(false);
-    });
+      if (!cancelled) setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [params.id]);
+
+  useEffect(() => {
+    if (!useApi) return;
+    const id = params.id as string;
+    const refetch = () => {
+      if (document.visibilityState !== "visible") return;
+      void fetchContact(id).then((c) => {
+        if (!c) return;
+        setContact(c);
+        if (!editingRef.current) setForm(c);
+      });
+    };
+    document.addEventListener("visibilitychange", refetch);
+    window.addEventListener("focus", refetch);
+    return () => {
+      document.removeEventListener("visibilitychange", refetch);
+      window.removeEventListener("focus", refetch);
+    };
+  }, [useApi, params.id]);
 
   if (loading) {
     return (
@@ -97,13 +123,18 @@ export default function ContactDetailPage() {
       if (useApi) {
         const updated = await apiUpdateContact(contact.id, form);
         setContact(updated);
+        setForm(updated);
       } else {
         localUpdateContact(contact.id, form);
         setContact({ ...contact, ...form } as Contact);
       }
     } catch {
-      localUpdateContact(contact.id, form);
-      setContact({ ...contact, ...form } as Contact);
+      alert(
+        useApi
+          ? "Could not save. Check your connection."
+          : "Could not save."
+      );
+      return;
     }
     setEditing(false);
     setSaved(true);
@@ -116,7 +147,12 @@ export default function ContactDetailPage() {
       if (useApi) await apiDeleteContact(contact.id);
       else localDeleteContact(contact.id);
     } catch {
-      localDeleteContact(contact.id);
+      alert(
+        useApi
+          ? "Could not delete. Check your connection."
+          : "Could not delete."
+      );
+      return;
     }
     router.push("/admin/contacts");
   };
@@ -144,9 +180,11 @@ export default function ContactDetailPage() {
         setForm({ ...form, ...updates });
       }
     } catch {
-      localUpdateContact(contact.id, updates);
-      setContact({ ...contact, ...updates });
-      setForm({ ...form, ...updates });
+      alert(
+        useApi
+          ? "Could not save. Check your connection."
+          : "Could not save."
+      );
     }
   };
 
@@ -171,9 +209,11 @@ export default function ContactDetailPage() {
         setForm({ ...form, ...updates });
       }
     } catch {
-      localUpdateContact(contact.id, updates);
-      setContact({ ...contact, ...updates });
-      setForm({ ...form, ...updates });
+      alert(
+        useApi
+          ? "Could not save. Check your connection."
+          : "Could not save."
+      );
     }
   };
 
