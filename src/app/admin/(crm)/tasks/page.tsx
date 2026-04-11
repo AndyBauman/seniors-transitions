@@ -10,10 +10,10 @@ import {
   Circle,
   X,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 import {
   getTasks,
-  getContacts,
   saveTask,
   updateTask,
   deleteTask,
@@ -23,15 +23,15 @@ import {
   isOverdue,
   getDaysSince,
 } from "@/lib/crm-store";
+import { useCrmContactsSync } from "@/hooks/use-crm-contacts-sync";
 
 export default function TasksPage() {
+  const { contacts, ready } = useCrmContactsSync();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const refresh = useCallback(() => {
     setTasks(getTasks());
-    setContacts(getContacts());
   }, []);
 
   useEffect(() => {
@@ -65,6 +65,14 @@ export default function TasksPage() {
     if (!id) return null;
     return contacts.find((c) => c.id === id)?.name || null;
   };
+
+  if (!ready) {
+    return (
+      <div className="p-8 text-gray-500 flex items-center gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin" /> Loading tasks…
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">

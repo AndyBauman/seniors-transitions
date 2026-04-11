@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Star,
   Clock,
   CheckCircle2,
   MapPin,
+  RefreshCw,
 } from "lucide-react";
 import {
-  getContacts,
-  updateContact,
   Contact,
   PipelineStage,
   CONTACT_TYPE_LABELS,
@@ -18,6 +17,7 @@ import {
   STAGE_COLORS,
   getDaysSince,
 } from "@/lib/crm-store";
+import { useCrmContactsSync } from "@/hooks/use-crm-contacts-sync";
 
 const STAGES: PipelineStage[] = [
   "new-lead",
@@ -29,32 +29,35 @@ const STAGES: PipelineStage[] = [
 ];
 
 export default function PipelinePage() {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const { contacts, ready, persistStage } = useCrmContactsSync();
   const [draggedId, setDraggedId] = useState<string | null>(null);
-
-  const refresh = useCallback(() => {
-    setContacts(getContacts());
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const handleDragStart = (id: string) => {
     setDraggedId(id);
   };
 
-  const handleDrop = (stage: PipelineStage) => {
-    if (draggedId) {
-      updateContact(draggedId, { stage });
-      setDraggedId(null);
-      refresh();
+  const handleDrop = async (stage: PipelineStage) => {
+    if (!draggedId) return;
+    const id = draggedId;
+    setDraggedId(null);
+    try {
+      await persistStage(id, stage);
+    } catch {
+      alert("Could not save stage. Check your connection.");
     }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
+
+  if (!ready) {
+    return (
+      <div className="p-8 text-gray-500 flex items-center gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin" /> Loading pipeline…
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">

@@ -12,11 +12,10 @@ import {
   Clock,
   ShieldCheck,
   CheckCircle2,
+  RefreshCw,
 } from "lucide-react";
 import {
-  getContacts,
   getTasks,
-  Contact,
   Task,
   CONTACT_TYPE_LABELS,
   STAGE_LABELS,
@@ -24,15 +23,15 @@ import {
   getDaysSince,
   isOverdue,
 } from "@/lib/crm-store";
+import { useCrmContactsSync } from "@/hooks/use-crm-contacts-sync";
 
 export default function AdminDashboard() {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const { contacts, ready } = useCrmContactsSync();
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    setContacts(getContacts());
     setTasks(getTasks());
-  }, []);
+  }, [ready]);
 
   const activePartners = contacts.filter((c) => c.stage === "active-partner");
   const needsFollowUp = contacts.filter(
@@ -71,6 +70,14 @@ export default function AdminDashboard() {
     },
     {} as Record<string, number>
   );
+
+  if (!ready) {
+    return (
+      <div className="p-8 text-gray-500 flex items-center gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin" /> Loading dashboard…
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-6 md:p-8 min-w-0 max-w-full">
