@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { Facebook, Linkedin, Instagram } from "lucide-react";
+import { SOCIAL_LINKS } from "@/lib/site";
+
+const socialLinks = [
+  { label: "Facebook", href: SOCIAL_LINKS.facebook, Icon: Facebook },
+  { label: "LinkedIn", href: SOCIAL_LINKS.linkedin, Icon: Linkedin },
+  { label: "Instagram", href: SOCIAL_LINKS.instagram, Icon: Instagram },
+];
 
 const quickLinks = [
   { name: "Home", href: "/" },
@@ -52,27 +59,18 @@ export default function Footer() {
               focus on what matters most.
             </p>
             <div className="flex gap-4">
-              <a
-                href="#"
-                className="text-white/70 hover:text-coral transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-white/70 hover:text-coral transition-colors"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="text-white/70 hover:text-coral transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
+              {socialLinks.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 hover:text-coral transition-colors"
+                  aria-label={label}
+                >
+                  <Icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
 

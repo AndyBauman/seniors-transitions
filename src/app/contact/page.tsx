@@ -5,6 +5,14 @@ import { Phone, Mail, Clock, MapPin, Send, Home, CheckCircle } from "lucide-reac
 import { trackMetaPixelLead, trackFormStart, getUTMParams } from "@/lib/analytics";
 import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
+const INQUIRY_LABELS: Record<string, string> = {
+  family: "Help for my family (senior transition)",
+  "home-valuation": "Home valuation / cash offer",
+  "placement-agent": "Partnership (placement agent)",
+  community: "Partnership (senior living community)",
+  other: "Other inquiry",
+};
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -29,11 +37,10 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitFailed(false);
-    trackMetaPixelLead({
-      service_type: formData.inquiryType,
-    });
 
-    const utmParams = getUTMParams();
+    const source = Object.entries(getUTMParams())
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ");
 
     const ok = await submitLead({
       name: formData.name,
@@ -45,14 +52,18 @@ export default function ContactPage() {
           : formData.inquiryType || "other",
       notes: [
         formData.message,
-        formData.inquiryType === "home-valuation" ? "[Home Valuation / Cash Offer Request]" : "",
-        utmParams ? `[Source: ${JSON.stringify(utmParams)}]` : "",
+        `[Inquiry: ${INQUIRY_LABELS[formData.inquiryType] ?? "Not specified"}]`,
+        source ? `[Source: ${source}]` : "",
       ].filter(Boolean).join("\n"),
     });
 
     setIsSubmitting(false);
-    if (ok) setIsSubmitted(true);
-    else setSubmitFailed(true);
+    if (ok) {
+      trackMetaPixelLead({ service_type: formData.inquiryType });
+      setIsSubmitted(true);
+    } else {
+      setSubmitFailed(true);
+    }
   };
 
   const handleChange = (
@@ -153,8 +164,9 @@ export default function ContactPage() {
                       Service Area
                     </h3>
                     <p className="text-muted-foreground">
-                      Serving families throughout the greater metropolitan area
-                      and surrounding communities.
+                      Serving families throughout the Portland, Oregon and
+                      Vancouver, Washington metro areas and surrounding
+                      communities.
                     </p>
                   </div>
                 </div>
@@ -169,7 +181,7 @@ export default function ContactPage() {
             </div>
 
             {/* Contact Form */}
-            <div>
+            <div id="contact-form" className="order-first lg:order-none scroll-mt-24">
               <div className="bg-muted p-8 rounded">
                 <h2 className="font-serif text-2xl font-medium text-navy mb-6">
                   Schedule a Consultation

@@ -62,7 +62,7 @@ export default function HomePage() {
       <section className="relative bg-navy overflow-hidden">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 items-center min-h-[500px] md:min-h-[600px]">
-            <div className="py-16 md:py-20 lg:py-24 lg:pr-12 text-white">
+            <div className="px-4 md:px-8 py-16 md:py-20 lg:py-24 lg:pr-12 text-white">
               <p className="geo-lede text-base md:text-lg text-white/95 font-normal max-w-xl mb-5 leading-relaxed">
                 <strong>Senior Transitions Group</strong> helps families in the{" "}
                 <strong>Portland, OR and Vancouver, WA</strong> metros with{" "}
@@ -112,7 +112,7 @@ export default function HomePage() {
       </section>
 
       <section className="bg-white border-b border-navy/10" aria-label="Summary">
-        <div className="container-custom py-10 md:py-12">
+        <div className="container-custom px-4 md:px-8 py-10 md:py-12">
           <div className="geo-tldr max-w-3xl border-l-4 border-coral pl-5 md:pl-6">
             <h2 className="text-xs font-bold uppercase tracking-wider text-navy mb-3">
               TL;DR

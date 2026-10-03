@@ -79,7 +79,7 @@ export function toPublicLead(
     title: text(body.title, MAX_FIELD),
     notes,
     stage: "new-lead",
-    score: 0,
+    score: 50,
     starred: false,
     verified: false,
     next_follow_up: todayInPortland(),

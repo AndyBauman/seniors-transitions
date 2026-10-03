@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
+const EMAIL_OR_PHONE_PATTERN =
+  "[^@\\s]+@[^@\\s]+\\.[^@\\s]+|\\+?[0-9 \\(\\)\\.\\-]{7,}";
+
 const situations = [
   {
     icon: Building,
@@ -64,11 +67,13 @@ export default function ReferPage() {
     const fd = new FormData(e.currentTarget);
     const field = (key: string) => ((fd.get(key) as string | null) ?? "").trim();
     const isPartner = activeTab === "partner";
+    const referrerContact = field("email");
+    const referrerGaveEmail = isPartner || referrerContact.includes("@");
 
     const ok = await submitLead({
       name: field("name"),
-      email: field("email"),
-      phone: isPartner ? field("phone") : "",
+      email: referrerGaveEmail ? referrerContact : "",
+      phone: isPartner ? field("phone") : referrerGaveEmail ? "" : referrerContact,
       type: isPartner ? "placement-agent" : "family",
       organization: field("organization"),
       notes: [
@@ -190,22 +195,24 @@ export default function ReferPage() {
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="pro-name" className="block text-sm font-medium text-navy mb-2">
                           Your Name *
                         </label>
                         <input
                           type="text"
+                          id="pro-name"
                           name="name"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="pro-organization" className="block text-sm font-medium text-navy mb-2">
                           Organization *
                         </label>
                         <input
                           type="text"
+                          id="pro-organization"
                           name="organization"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
@@ -214,32 +221,35 @@ export default function ReferPage() {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="pro-email" className="block text-sm font-medium text-navy mb-2">
                           Your Email *
                         </label>
                         <input
                           type="email"
+                          id="pro-email"
                           name="email"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="pro-phone" className="block text-sm font-medium text-navy mb-2">
                           Your Phone
                         </label>
                         <input
                           type="tel"
+                          id="pro-phone"
                           name="phone"
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-navy mb-2">
+                      <label htmlFor="pro-situation" className="block text-sm font-medium text-navy mb-2">
                         Family&apos;s Name & Situation *
                       </label>
                       <textarea
+                        id="pro-situation"
                         name="situation"
                         required
                         rows={4}
@@ -292,46 +302,52 @@ export default function ReferPage() {
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="fam-name" className="block text-sm font-medium text-navy mb-2">
                           Your Name *
                         </label>
                         <input
                           type="text"
+                          id="fam-name"
                           name="name"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="fam-contact" className="block text-sm font-medium text-navy mb-2">
                           Your Email or Phone *
                         </label>
                         <input
                           type="text"
+                          id="fam-contact"
                           name="email"
                           required
+                          pattern={EMAIL_OR_PHONE_PATTERN}
+                          title="Enter an email address or a phone number"
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="fam-family-name" className="block text-sm font-medium text-navy mb-2">
                           Their Name *
                         </label>
                         <input
                           type="text"
+                          id="fam-family-name"
                           name="familyName"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-navy mb-2">
+                        <label htmlFor="fam-reach" className="block text-sm font-medium text-navy mb-2">
                           Best Way to Reach Them
                         </label>
                         <input
                           type="text"
+                          id="fam-reach"
                           name="phone"
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                           placeholder="Phone or email"
@@ -339,10 +355,11 @@ export default function ReferPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-navy mb-2">
+                      <label htmlFor="fam-situation" className="block text-sm font-medium text-navy mb-2">
                         Their Situation
                       </label>
                       <textarea
+                        id="fam-situation"
                         name="situation"
                         rows={4}
                         className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent resize-none"

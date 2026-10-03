@@ -7,6 +7,12 @@ export const SITE_URL =
     "",
   );
 
+export const SOCIAL_LINKS = {
+  facebook: "https://www.facebook.com/SeniorTransitionsGroup",
+  linkedin: "https://www.linkedin.com/company/senior-transitions-group",
+  instagram: "https://www.instagram.com/seniortransitionsgroup",
+} as const;
+
 /** Portland–Vancouver metro: indexed city slugs only (state slug → city slugs). */
 export const SERVED_CITIES_BY_STATE: Record<string, string[]> = {
   oregon: [

@@ -1,4 +1,4 @@
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, SOCIAL_LINKS } from "@/lib/site";
 
 export function OrganizationSchema() {
   const schema = {
@@ -11,11 +11,7 @@ export function OrganizationSchema() {
     email: "info@seniors-transitions.com",
     description:
       "Senior living placement, home transition planning, downsizing, and move coordination for families in the Portland, Oregon and Vancouver, Washington metropolitan area.",
-    sameAs: [
-      "https://www.facebook.com/SeniorTransitionsGroup",
-      "https://www.linkedin.com/company/senior-transitions-group",
-      "https://www.instagram.com/seniortransitionsgroup",
-    ],
+    sameAs: Object.values(SOCIAL_LINKS),
     areaServed: [
       {
         "@type": "AdministrativeArea",
