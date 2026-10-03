@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isAdminRequest } from "@/lib/admin-auth";
 import { buildCanonicalSeedContacts } from "@/lib/crm-seed";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  if (!(await isAdminRequest(request))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   if (!isSupabaseConfigured || !supabase) {
     return NextResponse.json(
       { error: "Supabase not configured" },

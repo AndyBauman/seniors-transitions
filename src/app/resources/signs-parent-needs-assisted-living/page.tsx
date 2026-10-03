@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  ResourceArticleExtras,
+  PnwOfficialResourcesBox,
+} from "@/components/ResourceArticleExtras";
 
 export const metadata = {
   title: "Signs Your Parent May Need Assisted Living | Senior Transitions Group",
@@ -33,6 +37,12 @@ export default function SignsParentNeedsAssistedLivingPage() {
       <section className="bg-white">
         <div className="container-custom section-padding">
           <div className="max-w-3xl mx-auto">
+            <ResourceArticleExtras
+              headline="Signs Your Parent May Need Assisted Living"
+              description="Recognize safety, medication, nutrition, and isolation patterns that suggest assisted living may be appropriate—and what to do next."
+              path="/resources/signs-parent-needs-assisted-living"
+              bottomLine="If several safety, medication, nutrition, or isolation warning signs appear together, book a medical review and begin touring assisted living while you clarify budget and home logistics—do not wait for a crisis."
+            />
             <div className="space-y-8 text-muted-foreground leading-relaxed">
               <p className="text-lg">
                 Deciding that a parent needs more support than they can get at home is one of the most difficult realizations a family can face. The challenge is that the signs are often gradual&mdash;a missed medication here, a forgotten bill there, a fall that &ldquo;wasn&apos;t that bad.&rdquo; Individually, each incident seems manageable. But together, they paint a picture of declining safety and quality of life.
@@ -188,6 +198,8 @@ export default function SignsParentNeedsAssistedLivingPage() {
                   In these cases, prioritize safety above all else. A temporary respite stay in an assisted living community can provide a safe environment while your family makes longer-term plans.
                 </p>
               </div>
+
+              <PnwOfficialResourcesBox />
             </div>
           </div>
         </div>
@@ -253,8 +265,8 @@ export default function SignsParentNeedsAssistedLivingPage() {
               Our senior living advisors help families assess care needs, explore options, and find the right community&mdash;all at no cost to you. Schedule a free, confidential consultation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
-                Schedule Consultation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
               <a
                 href="tel:5037558555"

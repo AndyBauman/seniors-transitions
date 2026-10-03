@@ -1,0 +1,32 @@
+# Senior Transitions Group
+# https://seniors-transitions.com/llms.txt
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: PerplexityBot
+User-agent: Google-Extended
+Allow: /
+
+Disallow: /admin/
+Disallow: /admin/login/
+
+# Entry points
+Homepage: https://seniors-transitions.com/
+Services: https://seniors-transitions.com/services
+Placement: https://seniors-transitions.com/services/placement
+Real estate & downsizing: https://seniors-transitions.com/services/real-estate
+Transition coordination: https://seniors-transitions.com/services/transition
+Families: https://seniors-transitions.com/for-families
+Choosing senior living: https://seniors-transitions.com/choosing-senior-living
+Resources: https://seniors-transitions.com/resources
+Contact: https://seniors-transitions.com/contact
+
+# Service area (indexed location pages)
+Senior Transitions Group focuses on the greater Portland, Oregon and Vancouver, Washington metropolitan area. City-specific URLs under /oregon/ and /washington/ describe communities in that region only.
+
+# Citation-friendly summary
+Senior Transitions Group (STG) helps families coordinate senior living placement, home transition options, and move/downsizing planning in the Portland–Vancouver metro. Confirm current service area and offerings on the site or by phone: (503) 755-8555.

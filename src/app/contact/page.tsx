@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Phone, Mail, Clock, MapPin, Send } from "lucide-react";
+import { Phone, Mail, Clock, MapPin, Send, Home, CheckCircle } from "lucide-react";
 import { trackMetaPixelLead, trackFormStart, getUTMParams } from "@/lib/analytics";
+import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
   const formStarted = useRef(false);
 
   const handleFormFocus = () => {
@@ -26,19 +28,31 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    setSubmitFailed(false);
     trackMetaPixelLead({
       service_type: formData.inquiryType,
     });
 
     const utmParams = getUTMParams();
-    console.log("Lead source:", utmParams);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const ok = await submitLead({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      type:
+        formData.inquiryType === "home-valuation"
+          ? "family"
+          : formData.inquiryType || "other",
+      notes: [
+        formData.message,
+        formData.inquiryType === "home-valuation" ? "[Home Valuation / Cash Offer Request]" : "",
+        utmParams ? `[Source: ${JSON.stringify(utmParams)}]` : "",
+      ].filter(Boolean).join("\n"),
+    });
 
     setIsSubmitting(false);
-    setIsSubmitted(true);
+    if (ok) setIsSubmitted(true);
+    else setSubmitFailed(true);
   };
 
   const handleChange = (
@@ -162,18 +176,69 @@ export default function ContactPage() {
                 </h2>
 
                 {isSubmitted ? (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-coral/10 flex items-center justify-center mx-auto mb-4 rounded-full">
-                      <Send className="h-8 w-8 text-coral" />
+                  formData.inquiryType === "home-valuation" ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-coral/10 flex items-center justify-center mx-auto mb-4 rounded-full">
+                        <Home className="h-8 w-8 text-coral" />
+                      </div>
+                      <h3 className="font-serif text-xl font-medium text-navy mb-2">
+                        We&apos;re On It
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        Your home valuation request has been received. One of our
+                        SRES-certified specialists will reach out within 24 hours
+                        with next steps.
+                      </p>
+                      <div className="bg-white rounded p-4 text-left space-y-3 mb-4">
+                        <h4 className="font-semibold text-navy text-sm">What happens next:</h4>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" />
+                          <p className="text-muted-foreground text-sm">We&apos;ll review your information and prepare a preliminary assessment</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" />
+                          <p className="text-muted-foreground text-sm">A specialist will call to learn more about the property and your timeline</p>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" />
+                          <p className="text-muted-foreground text-sm">You&apos;ll receive a no-obligation cash offer or market listing recommendation</p>
+                        </div>
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-3">
+                        Need to talk sooner? Call us directly:
+                      </p>
+                      <a
+                        href="tel:5037558555"
+                        className="inline-flex items-center text-coral font-medium hover:underline"
+                      >
+                        <Phone className="mr-2 h-4 w-4" />
+                        (503) 755-8555
+                      </a>
                     </div>
-                    <h3 className="font-serif text-xl font-medium text-navy mb-2">
-                      Thank You!
-                    </h3>
-                    <p className="text-muted-foreground">
-                      We&apos;ve received your message and will be in touch
-                      within 24 hours.
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-coral/10 flex items-center justify-center mx-auto mb-4 rounded-full">
+                        <Send className="h-8 w-8 text-coral" />
+                      </div>
+                      <h3 className="font-serif text-xl font-medium text-navy mb-2">
+                        Thank You!
+                      </h3>
+                      <p className="text-muted-foreground mb-3">
+                        We&apos;ve received your message and will be in touch
+                        within 24 hours.
+                      </p>
+                      <p className="text-muted-foreground text-sm mb-3">
+                        Want to talk sooner?
+                      </p>
+                      <a
+                        href="tel:5037558555"
+                        className="inline-flex items-center text-coral font-medium hover:underline"
+                      >
+                        <Phone className="mr-2 h-4 w-4" />
+                        (503) 755-8555
+                      </a>
+                    </div>
+                  )
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6" onFocus={handleFormFocus}>
                     <div>
@@ -251,6 +316,9 @@ export default function ContactPage() {
                         <option value="family">
                           Help for my family (senior transition)
                         </option>
+                        <option value="home-valuation">
+                          Home valuation / cash offer
+                        </option>
                         <option value="placement-agent">
                           Partnership (I&apos;m a placement agent)
                         </option>
@@ -286,6 +354,12 @@ export default function ContactPage() {
                     >
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </button>
+
+                    {submitFailed && (
+                      <p role="alert" className="text-sm text-red-700 text-center">
+                        {LEAD_ERROR_MESSAGE}
+                      </p>
+                    )}
 
                     <p className="text-xs text-muted-foreground text-center">
                       By submitting this form, you agree to our privacy policy.

@@ -3,6 +3,7 @@ import { Lato, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/LayoutShell";
+import { SITE_URL } from "@/lib/site";
 
 const lato = Lato({
   variable: "--font-lato",
@@ -18,9 +19,36 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Senior Transitions Group | Expert Senior Transition Specialists",
-  description: "We guide seniors and families through life's most significant housing changes with expertise, compassion, and unwavering support.",
-  keywords: ["senior transitions", "senior living", "downsizing", "real estate", "placement services", "move management"],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default:
+      "Senior Transitions Group | Portland–Vancouver Senior Living & Transition Help",
+    template: "%s | Senior Transitions Group",
+  },
+  description:
+    "Portland–Vancouver metro: senior living placement, home transition planning, downsizing, and move coordination for families—no-obligation conversation at (503) 755-8555.",
+  keywords: [
+    "senior transitions",
+    "senior living Portland",
+    "assisted living placement Vancouver WA",
+    "downsizing",
+    "senior move management",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Senior Transitions Group",
+    title: "Senior Transitions Group | Portland–Vancouver Senior Transitions",
+    description:
+      "Placement, real estate & downsizing, and move coordination for families in the Portland, OR and Vancouver, WA metros.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Senior Transitions Group",
+    description:
+      "Senior living placement and home transition help in the Portland–Vancouver metro.",
+  },
 };
 
 export default function RootLayout({

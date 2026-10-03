@@ -1,23 +1,33 @@
+import { SITE_URL } from "@/lib/site";
+
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Senior Transitions Group",
-    url: "https://seniors-transitions.com",
-    logo: "https://seniors-transitions.com/logo.png",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
     telephone: "(503) 755-8555",
     email: "info@seniors-transitions.com",
     description:
-      "Expert senior transition specialists guiding families through life's most significant housing changes.",
+      "Senior living placement, home transition planning, downsizing, and move coordination for families in the Portland, Oregon and Vancouver, Washington metropolitan area.",
     sameAs: [
       "https://www.facebook.com/SeniorTransitionsGroup",
       "https://www.linkedin.com/company/senior-transitions-group",
       "https://www.instagram.com/seniortransitionsgroup",
     ],
-    areaServed: {
-      "@type": "Country",
-      name: "United States",
-    },
+    areaServed: [
+      {
+        "@type": "AdministrativeArea",
+        name: "Portland metropolitan area",
+        containedInPlace: { "@type": "State", name: "Oregon" },
+      },
+      {
+        "@type": "AdministrativeArea",
+        name: "Vancouver metropolitan area",
+        containedInPlace: { "@type": "State", name: "Washington" },
+      },
+    ],
     serviceType: [
       "Senior Move Management",
       "Senior Living Placement",
@@ -55,7 +65,7 @@ export function ServiceSchema({
     provider: {
       "@type": "Organization",
       name: "Senior Transitions Group",
-      url: "https://seniors-transitions.com",
+      url: SITE_URL,
       telephone: "(503) 755-8555",
     },
   };
@@ -105,6 +115,50 @@ interface LocalBusinessSchemaProps {
   services: string[];
 }
 
+interface ArticleSchemaProps {
+  headline: string;
+  description: string;
+  url: string;
+  datePublished?: string;
+  dateModified?: string;
+}
+
+export function ArticleSchema({
+  headline,
+  description,
+  url,
+  datePublished = "2025-06-01",
+  dateModified = "2026-05-01",
+}: ArticleSchemaProps) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    url,
+    datePublished,
+    dateModified,
+    author: {
+      "@type": "Organization",
+      name: "Senior Transitions Group",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Senior Transitions Group",
+      url: SITE_URL,
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
 export function LocalBusinessSchema({
   city,
   state,
@@ -114,7 +168,7 @@ export function LocalBusinessSchema({
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: `Senior Transitions Group – ${city}, ${state}`,
-    url: "https://seniors-transitions.com",
+    url: SITE_URL,
     telephone: "(503) 755-8555",
     email: "info@seniors-transitions.com",
     areaServed: {

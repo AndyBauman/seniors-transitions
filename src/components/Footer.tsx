@@ -12,7 +12,7 @@ const quickLinks = [
 const familyLinks = [
   { name: "For Families", href: "/for-families" },
   { name: "Help My Parent Move", href: "/help-my-parent-move" },
-  { name: "Free Consultation", href: "/free-consultation" },
+  { name: "Free Family Consultation", href: "/free-family-consultation" },
   { name: "Downsizing Checklist", href: "/resources/downsizing-checklist" },
   { name: "Refer a Family", href: "/refer" },
 ];
@@ -47,10 +47,9 @@ export default function Footer() {
               Senior Transitions Group
             </h3>
             <p className="text-white/70 text-sm mb-6">
-              Expert senior transition specialists guiding families with
-              compassion and expertise. We handle placement, real estate,
-              downsizing, and move management so you can focus on what matters
-              most.
+              Expert senior transition specialists in the Portland–Vancouver metro.
+              Placement, real estate, downsizing, and move management so you can
+              focus on what matters most.
             </p>
             <div className="flex gap-4">
               <a
@@ -156,7 +155,7 @@ export default function Footer() {
               © {new Date().getFullYear()} Senior Transitions Group. All rights
               reserved.
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4 justify-center md:justify-end">
               <Link
                 href="/privacy"
                 className="text-white/50 hover:text-coral text-sm transition-colors"
@@ -169,6 +168,12 @@ export default function Footer() {
               >
                 Terms of Service
               </Link>
+              <a
+                href="/llms.txt"
+                className="text-white/50 hover:text-coral text-sm transition-colors"
+              >
+                For AI assistants
+              </a>
             </div>
           </div>
         </div>

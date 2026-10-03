@@ -9,6 +9,7 @@ import {
   Send,
   Phone,
 } from "lucide-react";
+import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
 const benefits = [
   {
@@ -49,13 +50,26 @@ export default function PartnerWithUsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setSubmitFailed(false);
+
+    const ok = await submitLead({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      type: formData.partnerType || "other",
+      organization: formData.organization,
+      title: formData.title,
+      notes: [formData.message, "[Partner Inquiry]"].filter(Boolean).join("\n"),
+    });
+
     setIsSubmitting(false);
-    setIsSubmitted(true);
+    if (ok) setIsSubmitted(true);
+    else setSubmitFailed(true);
   };
 
   const handleChange = (
@@ -316,6 +330,12 @@ export default function PartnerWithUsPage() {
                         ? "Sending..."
                         : "Submit Partnership Inquiry"}
                     </button>
+
+                    {submitFailed && (
+                      <p role="alert" className="text-sm text-red-700 text-center">
+                        {LEAD_ERROR_MESSAGE}
+                      </p>
+                    )}
 
                     <p className="text-xs text-muted-foreground text-center">
                       We respond to all partnership inquiries within one

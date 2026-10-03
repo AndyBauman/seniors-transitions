@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isAdminRequest } from "@/lib/admin-auth";
+import { blankNullText } from "@/lib/lead-intake";
 
 type Ctx = { params: Promise<{ id: string }> };
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
+function unauthorized() {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
+export async function GET(request: NextRequest, ctx: Ctx) {
+  if (!(await isAdminRequest(request))) return unauthorized();
+
   if (!isSupabaseConfigured || !supabase) {
     return NextResponse.json(
       { error: "Supabase not configured" },
@@ -26,6 +34,8 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
 }
 
 export async function PATCH(request: NextRequest, ctx: Ctx) {
+  if (!(await isAdminRequest(request))) return unauthorized();
+
   if (!isSupabaseConfigured || !supabase) {
     return NextResponse.json(
       { error: "Supabase not configured" },
@@ -43,7 +53,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
 
   const { data, error } = await supabase
     .from("contacts")
-    .update(body)
+    .update(blankNullText(body))
     .eq("id", id)
     .select()
     .single();
@@ -55,7 +65,9 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
   return NextResponse.json(data);
 }
 
-export async function DELETE(_req: NextRequest, ctx: Ctx) {
+export async function DELETE(request: NextRequest, ctx: Ctx) {
+  if (!(await isAdminRequest(request))) return unauthorized();
+
   if (!isSupabaseConfigured || !supabase) {
     return NextResponse.json(
       { error: "Supabase not configured" },

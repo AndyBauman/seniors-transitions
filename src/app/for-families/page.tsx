@@ -14,12 +14,24 @@ export default function ForFamiliesPage() {
       <section className="bg-navy">
         <div className="container-custom section-padding">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h1 className="font-serif text-4xl md:text-5xl font-medium italic mb-6">
-              For Seniors & Families
-            </h1>
-            <p className="text-lg text-white/80">
-              When the family home becomes too much, we&apos;re here.
+            <p className="text-base md:text-lg text-white/95 mb-5 leading-relaxed max-w-2xl mx-auto">
+              <strong>Senior Transitions Group</strong> helps adult children and
+              seniors in the <strong>Portland, OR and Vancouver, WA</strong>{" "}
+              metros plan a move into senior living while coordinating{" "}
+              <strong>placement, home transition, and downsizing</strong> on one
+              timeline.
             </p>
+            <h1 className="font-serif text-4xl md:text-5xl font-medium italic mb-6">
+              Help for families when a parent needs to move
+            </h1>
+            <p className="text-lg text-white/80 mb-8">
+              If safety, medication, or caregiver burnout has made staying home
+              unrealistic, start with a no-obligation conversation—we map care
+              needs, budget, and housing before any commitment.
+            </p>
+            <Link href="/free-family-consultation" className="btn-primary">
+              Free Family Consultation
+            </Link>
           </div>
         </div>
       </section>
@@ -226,8 +238,8 @@ export default function ForFamiliesPage() {
               Available 7 days a week for your convenience
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
-                Schedule Consultation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
               <a
                 href="tel:5037558555"

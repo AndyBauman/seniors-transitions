@@ -104,8 +104,8 @@ export default function Header() {
         </div>
 
         <div className="hidden lg:flex items-center">
-          <Link href="/contact" className="btn-primary">
-            Schedule Consultation
+          <Link href="/free-family-consultation" className="btn-primary">
+            Free Consultation
           </Link>
         </div>
 
@@ -176,11 +176,11 @@ export default function Header() {
             )}
             <div className="pt-4 border-t border-border">
               <Link
-                href="/contact"
+                href="/free-family-consultation"
                 className="btn-primary w-full text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Schedule Consultation
+                Free Consultation
               </Link>
             </div>
           </div>

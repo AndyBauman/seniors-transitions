@@ -78,4 +78,10 @@ export async function verifySessionToken(token: string | undefined): Promise<boo
   }
 }
 
+export async function isAdminRequest(request: {
+  cookies: { get(name: string): { value: string } | undefined };
+}): Promise<boolean> {
+  return verifySessionToken(request.cookies.get(COOKIE_NAME)?.value);
+}
+
 export { COOKIE_NAME, MAX_AGE_SEC };

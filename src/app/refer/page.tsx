@@ -12,6 +12,7 @@ import {
   Send,
   Package,
 } from "lucide-react";
+import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
 const situations = [
   {
@@ -52,13 +53,35 @@ export default function ReferPage() {
   const [activeTab, setActiveTab] = useState<"partner" | "family">("partner");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    setSubmitFailed(false);
+
+    const fd = new FormData(e.currentTarget);
+    const field = (key: string) => ((fd.get(key) as string | null) ?? "").trim();
+    const isPartner = activeTab === "partner";
+
+    const ok = await submitLead({
+      name: field("name"),
+      email: field("email"),
+      phone: isPartner ? field("phone") : "",
+      type: isPartner ? "placement-agent" : "family",
+      organization: field("organization"),
+      notes: [
+        isPartner ? "" : `Referred family: ${field("familyName")}`,
+        isPartner || !field("phone") ? "" : `Reach them at: ${field("phone")}`,
+        field("situation"),
+        `[Referral — ${isPartner ? "Professional Partner" : "Family/Friend"}]`,
+      ].filter(Boolean).join("\n"),
+    });
+
     setIsSubmitting(false);
-    setIsSubmitted(true);
+    if (ok) setIsSubmitted(true);
+    else setSubmitFailed(true);
   };
 
   return (
@@ -172,6 +195,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="name"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -182,6 +206,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="organization"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -194,6 +219,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="email"
+                          name="email"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -204,6 +230,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="tel"
+                          name="phone"
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
                       </div>
@@ -213,6 +240,7 @@ export default function ReferPage() {
                         Family&apos;s Name & Situation *
                       </label>
                       <textarea
+                        name="situation"
                         required
                         rows={4}
                         className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent resize-none"
@@ -226,6 +254,11 @@ export default function ReferPage() {
                     >
                       {isSubmitting ? "Sending..." : "Submit Referral"}
                     </button>
+                    {submitFailed && (
+                      <p role="alert" className="text-sm text-red-700 text-center">
+                        {LEAD_ERROR_MESSAGE}
+                      </p>
+                    )}
                   </form>
                 )}
               </div>
@@ -264,6 +297,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="name"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -274,6 +308,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="email"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -286,6 +321,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="familyName"
                           required
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                         />
@@ -296,6 +332,7 @@ export default function ReferPage() {
                         </label>
                         <input
                           type="text"
+                          name="phone"
                           className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent"
                           placeholder="Phone or email"
                         />
@@ -306,6 +343,7 @@ export default function ReferPage() {
                         Their Situation
                       </label>
                       <textarea
+                        name="situation"
                         rows={4}
                         className="w-full px-4 py-3 border border-border bg-white rounded focus:outline-none focus:ring-2 focus:ring-coral focus:border-transparent resize-none"
                         placeholder="Anything you can share helps us approach them with the right context..."
@@ -318,6 +356,11 @@ export default function ReferPage() {
                     >
                       {isSubmitting ? "Sending..." : "Send Referral"}
                     </button>
+                    {submitFailed && (
+                      <p role="alert" className="text-sm text-red-700 text-center">
+                        {LEAD_ERROR_MESSAGE}
+                      </p>
+                    )}
                   </form>
                 )}
               </div>

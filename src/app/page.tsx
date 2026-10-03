@@ -1,17 +1,76 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Home, Users, Heart, Phone, Quote } from "lucide-react";
 import { HowWeHelp } from "@/components/sections/HowWeHelp";
 import { UnderstandingYourOptions } from "@/components/sections/UnderstandingYourOptions";
+import { FAQSchema } from "@/components/SchemaMarkup";
+
+const homeFaqs = [
+  {
+    question: "What does Senior Transitions Group do?",
+    answer:
+      "We help families in the Portland, Oregon and Vancouver, Washington metros coordinate senior living placement, home transition options (including paths to sell or transition the family home), and downsizing or move management—so housing logistics do not delay care decisions.",
+  },
+  {
+    question: "Who is your service for?",
+    answer:
+      "Adult children, seniors, and professionals when a parent needs more support than living at home safely provides—whether that means assisted living, memory care, downsizing, or an urgent move after a health event.",
+  },
+  {
+    question: "How much does placement cost for families?",
+    answer:
+      "For qualifying placements in our service area, community placement guidance is provided at no cost to the family; senior living communities compensate the advisor. We explain how we are paid before you commit. Other services such as move coordination or real estate are quoted separately.",
+  },
+  {
+    question: "How long does a typical senior transition take?",
+    answer:
+      "Placement-focused timelines often run about 2–6 weeks; a full transition that includes home transition and downsizing commonly runs 8–12 weeks. Urgent situations can be expedited—call (503) 755-8555 to discuss your timeline.",
+  },
+  {
+    question: "What areas do you serve?",
+    answer:
+      "We focus on the greater Portland–Vancouver metropolitan area, including cities such as Portland, Beaverton, Lake Oswego, Tigard, Gresham, Hillsboro, West Linn, Oregon City, Vancouver, and Camas. See our local pages for details.",
+  },
+  {
+    question: "Can you help if we need to move quickly?",
+    answer:
+      "Yes. We coordinate urgent relocations—including hospital-to-community transitions and rapid downsizing—when safety or discharge timelines require fast action in our metro.",
+  },
+  {
+    question: "Do you help with selling the family home?",
+    answer:
+      "Yes. Our real estate and downsizing services align home exit strategy with move-in dates, including traditional listing and other options depending on condition, timeline, and family goals.",
+  },
+  {
+    question: "How do we get started?",
+    answer:
+      "Schedule a free, no-obligation family consultation online or call (503) 755-8555. We listen first, then outline a clear path—never a high-pressure sales pitch.",
+  },
+];
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
 
 export default function HomePage() {
   return (
     <>
+      <FAQSchema questions={homeFaqs} />
       {/* Hero Section */}
       <section className="relative bg-navy overflow-hidden">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 items-center min-h-[500px] md:min-h-[600px]">
             <div className="py-16 md:py-20 lg:py-24 lg:pr-12 text-white">
+              <p className="geo-lede text-base md:text-lg text-white/95 font-normal max-w-xl mb-5 leading-relaxed">
+                <strong>Senior Transitions Group</strong> helps families in the{" "}
+                <strong>Portland, OR and Vancouver, WA</strong> metros with{" "}
+                <strong>senior living placement</strong>,{" "}
+                <strong>home transition planning</strong>, and{" "}
+                <strong>downsizing and move coordination</strong>—so care and
+                housing decisions are not blocked by the house.
+              </p>
               <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-medium italic mb-6">
                 Every Transition Deserves a Trusted Partner
               </h1>
@@ -20,8 +79,8 @@ export default function HomePage() {
                 housing changes with expertise, compassion, and unwavering
                 support.
               </p>
-              <Link href="/contact" className="btn-primary">
-                Begin the Conversation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
             </div>
             <div className="relative hidden lg:block h-full min-h-[500px]">
@@ -49,6 +108,40 @@ export default function HomePage() {
             priority
             unoptimized
           />
+        </div>
+      </section>
+
+      <section className="bg-white border-b border-navy/10" aria-label="Summary">
+        <div className="container-custom py-10 md:py-12">
+          <div className="geo-tldr max-w-3xl border-l-4 border-coral pl-5 md:pl-6">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-navy mb-3">
+              TL;DR
+            </h2>
+            <ol className="list-decimal pl-5 space-y-2 text-navy text-sm md:text-base leading-relaxed">
+              <li>
+                <strong>What we do:</strong> Placement guidance, real
+                estate/downsize options, and transition coordination—together or
+                à la carte.
+              </li>
+              <li>
+                <strong>Where:</strong> Greater Portland–Vancouver area; see{" "}
+                <Link href="/oregon/portland" className="text-coral underline hover:no-underline">
+                  local pages
+                </Link>{" "}
+                for nearby cities.
+              </li>
+              <li>
+                <strong>First step:</strong> No-obligation conversation—{" "}
+                <Link
+                  href="/free-family-consultation"
+                  className="text-coral underline hover:no-underline"
+                >
+                  free family consultation
+                </Link>{" "}
+                or call (503) 755-8555.
+              </li>
+            </ol>
+          </div>
         </div>
       </section>
 
@@ -90,9 +183,8 @@ export default function HomePage() {
                 Placement Services
               </h3>
               <p className="text-muted-foreground mb-6 text-sm">
-                We guide seniors and families through life&apos;s most
-                significant housing changes with expertise, compassion, and
-                unwavering support.
+                Shortlists and tours aligned to care needs, budget, and
+                location—then help with paperwork and move-in timing.
               </p>
               <Link
                 href="/services/placement"
@@ -265,6 +357,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="bg-white section-padding">
+        <div className="container-custom max-w-3xl">
+          <h2 className="font-serif text-3xl md:text-4xl text-navy text-center mb-10">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-4">
+            {homeFaqs.map((faq) => (
+              <details
+                key={faq.question}
+                className="group border border-navy/10 rounded-lg"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between p-5 font-medium text-navy">
+                  {faq.question}
+                </summary>
+                <div className="px-5 pb-5 text-muted-foreground text-sm leading-relaxed">
+                  {faq.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-navy text-white">
         <div className="container-custom section-padding">
@@ -273,14 +389,14 @@ export default function HomePage() {
               Let&apos;s Talk About Your Family
             </h2>
             <p className="text-white/80 mb-2">
-              No obligation. Just conversation and clarity.
+              No obligation. We explain how we are paid before you decide.
             </p>
             <p className="text-white/60 text-sm mb-8">
-              Available 7 days a week for your convenience
+              Mon–Fri 9am–6pm · Sat 10am–4pm · (503) 755-8555
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
-                Schedule Consultation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
               <a
                 href="tel:5037558555"

@@ -1,31 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ServiceSchema, FAQSchema } from "@/components/SchemaMarkup";
+import {
+  SERVED_CITIES_BY_STATE,
+  CITY_SERVICE_SLUGS,
+  SITE_URL,
+  type CityServiceSlug,
+} from "@/lib/site";
 
-const CITIES: Record<string, string[]> = {
-  arizona: ["phoenix", "scottsdale", "tucson"],
-  california: ["los-angeles", "san-diego", "san-francisco"],
-  colorado: ["denver", "colorado-springs"],
-  florida: ["miami", "tampa", "orlando", "jacksonville"],
-  texas: ["houston", "dallas", "austin", "san-antonio"],
-  "new-york": ["new-york-city", "buffalo"],
-  illinois: ["chicago"],
-  ohio: ["columbus", "cleveland"],
-  pennsylvania: ["philadelphia", "pittsburgh"],
-  washington: ["seattle"],
-};
-
-const SERVICE_SLUGS = [
-  "senior-move-manager",
-  "help-parents-downsize",
-  "move-to-assisted-living",
-  "move-to-memory-care",
-  "estate-cleanout",
-  "downsizing-services-for-seniors",
-  "emergency-senior-move",
-] as const;
-
-type ServiceSlug = (typeof SERVICE_SLUGS)[number];
+type ServiceSlug = CityServiceSlug;
 
 interface ServiceInfo {
   displayName: string;
@@ -137,9 +120,9 @@ function toDisplayName(slug: string): string {
 
 export function generateStaticParams() {
   const params: { state: string; city: string; service: string }[] = [];
-  for (const [state, cities] of Object.entries(CITIES)) {
+  for (const [state, cities] of Object.entries(SERVED_CITIES_BY_STATE)) {
     for (const city of cities) {
-      for (const service of SERVICE_SLUGS) {
+      for (const service of CITY_SERVICE_SLUGS) {
         params.push({ state, city, service });
       }
     }
@@ -162,12 +145,15 @@ export async function generateMetadata({
 
   return {
     title: `${serviceName} in ${cityName}, ${stateName} | Senior Transitions Group`,
-    description: `${serviceInfo?.shortDescription ?? "Professional senior transition services."} Serving ${cityName}, ${stateName}. Call (503) 755-8555 for a free consultation.`,
+    description: `${serviceInfo?.shortDescription ?? "Professional senior transition services."} Portland–Vancouver metro, including ${cityName}. (503) 755-8555 — free consultation.`,
     keywords: [
       `${serviceName.toLowerCase()} ${cityName}`,
       `senior transition services ${cityName} ${stateName}`,
       `senior move help ${cityName}`,
     ],
+    alternates: {
+      canonical: `${SITE_URL}/${state}/${city}/${service}`,
+    },
   };
 }
 
@@ -198,7 +184,7 @@ export default async function ServicePage({ params }: PageProps) {
       <ServiceSchema
         serviceName={`${serviceName} in ${cityName}, ${stateName}`}
         description={serviceInfo?.shortDescription ?? ""}
-        url={`https://seniors-transitions.com/${state}/${city}/${service}`}
+        url={`${SITE_URL}/${state}/${city}/${service}`}
       />
       <FAQSchema questions={faqItems} />
 
@@ -214,8 +200,8 @@ export default async function ServicePage({ params }: PageProps) {
           <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto mb-8">
             {serviceInfo?.shortDescription}
           </p>
-          <Link href="/contact" className="btn-primary text-lg">
-            Get a Free Consultation
+          <Link href="/free-family-consultation" className="btn-primary text-lg">
+            Free Family Consultation
           </Link>
         </div>
       </section>
@@ -316,7 +302,7 @@ export default async function ServicePage({ params }: PageProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/free-family-consultation"
               className="bg-white text-coral font-bold py-3 px-8 rounded-lg hover:bg-white/90 transition-colors text-lg"
             >
               Schedule Consultation

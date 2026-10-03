@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  ResourceArticleExtras,
+  PnwOfficialResourcesBox,
+} from "@/components/ResourceArticleExtras";
 
 export const metadata = {
   title: "The Complete Senior Downsizing Checklist | Senior Transitions Group",
@@ -33,6 +37,12 @@ export default function DownsizingChecklistPage() {
       <section className="bg-white">
         <div className="container-custom section-padding">
           <div className="max-w-3xl mx-auto">
+            <ResourceArticleExtras
+              headline="The Complete Senior Downsizing Checklist"
+              description="A phased senior downsizing checklist from three months before move-in through settling in, with a room-by-room sorting guide."
+              path="/resources/downsizing-checklist"
+              bottomLine="Break downsizing into timed phases (3 months out → move week → first weeks in community) and work room-by-room so nothing critical is missed before keys change hands."
+            />
             <div className="space-y-8 text-muted-foreground leading-relaxed">
               <p className="text-lg">
                 Downsizing for a move to senior living involves hundreds of decisions, dozens of tasks, and a timeline that can feel impossibly tight. The families who handle it most successfully are the ones who break it into manageable phases and work through them methodically.
@@ -259,6 +269,8 @@ export default function DownsizingChecklistPage() {
                   </div>
                 </div>
               </div>
+
+              <PnwOfficialResourcesBox />
             </div>
           </div>
         </div>
@@ -324,8 +336,8 @@ export default function DownsizingChecklistPage() {
               Our transition specialists manage the entire downsizing and moving process&mdash;so you can focus on supporting your loved one. From sorting to setup, we&apos;re with you every step of the way.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
-                Schedule Consultation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
               <a
                 href="tel:5037558555"

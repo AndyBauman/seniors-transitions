@@ -72,6 +72,7 @@ export default function ContactsPage() {
 function ContactsContent() {
   const searchParams = useSearchParams();
   const typeFilter = searchParams.get("type") as ContactType | null;
+  const stageParam = searchParams.get("stage") as PipelineStage | null;
 
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
@@ -80,14 +81,14 @@ function ContactsContent() {
     "all" | "verified" | "unverified"
   >("all");
   const [stateFilter, setStateFilter] = useState<string>("all");
-  const [stageFilter, setStageFilter] = useState<string>("all");
+  const [stageFilter, setStageFilter] = useState<string>(stageParam || "all");
   const [typeFilterLocal, setTypeFilterLocal] = useState<string>("all");
   const [syncingDirectory, setSyncingDirectory] = useState(false);
   const [useApi, setUseApi] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!stageParam);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);

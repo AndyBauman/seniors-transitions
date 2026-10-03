@@ -1,19 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LocalBusinessSchema, FAQSchema } from "@/components/SchemaMarkup";
-
-const CITIES: Record<string, string[]> = {
-  arizona: ["phoenix", "scottsdale", "tucson"],
-  california: ["los-angeles", "san-diego", "san-francisco"],
-  colorado: ["denver", "colorado-springs"],
-  florida: ["miami", "tampa", "orlando", "jacksonville"],
-  texas: ["houston", "dallas", "austin", "san-antonio"],
-  "new-york": ["new-york-city", "buffalo"],
-  illinois: ["chicago"],
-  ohio: ["columbus", "cleveland"],
-  pennsylvania: ["philadelphia", "pittsburgh"],
-  washington: ["seattle"],
-};
+import {
+  SERVED_CITIES_BY_STATE,
+  SITE_URL,
+  CITY_LOCAL_INSIGHTS,
+} from "@/lib/site";
 
 function toDisplayName(slug: string): string {
   return slug
@@ -24,7 +16,7 @@ function toDisplayName(slug: string): string {
 
 export function generateStaticParams() {
   const params: { state: string; city: string }[] = [];
-  for (const [state, cities] of Object.entries(CITIES)) {
+  for (const [state, cities] of Object.entries(SERVED_CITIES_BY_STATE)) {
     for (const city of cities) {
       params.push({ state, city });
     }
@@ -44,8 +36,11 @@ export async function generateMetadata({
   const stateName = toDisplayName(state);
 
   return {
-    title: `Senior Move Management in ${cityName}, ${stateName} | Senior Transitions Group`,
-    description: `Expert senior transition services in ${cityName}, ${stateName}. We help with senior moves, downsizing, assisted living placement, estate cleanouts, and more. Call (503) 755-8555.`,
+    title: `Senior Transitions in ${cityName}, ${stateName} | Senior Transitions Group`,
+    description: `Portland–Vancouver metro team serving ${cityName}, ${stateName}: senior living placement, downsizing, home transition planning, and move coordination. Free consultation: (503) 755-8555.`,
+    alternates: {
+      canonical: `${SITE_URL}/${state}/${city}`,
+    },
     keywords: [
       `senior move management ${cityName}`,
       `downsizing services ${cityName}`,
@@ -60,11 +55,12 @@ export default async function CityPage({ params }: PageProps) {
   const { state, city } = await params;
   const cityName = toDisplayName(city);
   const stateName = toDisplayName(state);
+  const localInsight = CITY_LOCAL_INSIGHTS[city];
 
   const faqItems = [
     {
       question: `What senior transition services are available in ${cityName}?`,
-      answer: `Senior Transitions Group offers comprehensive services in ${cityName} including senior move management, downsizing assistance, assisted living and memory care placement, estate cleanouts, and emergency moves. We coordinate every detail so families can focus on what matters most.`,
+      answer: `Senior Transitions Group offers senior move management, downsizing assistance, assisted living and memory care placement, estate cleanouts, and urgent move support for families in ${cityName} as part of our Portland–Vancouver metro coverage. We coordinate details so your family can focus on care and decisions.`,
     },
     {
       question: `How much does senior move management cost in ${cityName}, ${stateName}?`,
@@ -72,7 +68,7 @@ export default async function CityPage({ params }: PageProps) {
     },
     {
       question: `How do I find the right assisted living community in ${cityName}?`,
-      answer: `Our placement specialists in ${cityName} evaluate your loved one's care needs, preferences, and budget to recommend the best-fit communities. We tour communities with you, help with paperwork, and coordinate the entire transition at no cost to your family.`,
+      answer: `Our placement specialists serving ${cityName} evaluate your loved one's care needs, preferences, and budget to recommend the best-fit communities in the Portland–Vancouver metro. We tour communities with you, help with paperwork, and coordinate the transition at no cost to your family for qualifying placements.`,
     },
     {
       question: `Can you help with an emergency senior move in ${cityName}?`,
@@ -80,7 +76,7 @@ export default async function CityPage({ params }: PageProps) {
     },
     {
       question: `Do you serve all neighborhoods in ${cityName} and surrounding ${stateName} communities?`,
-      answer: `We serve ${cityName} and the broader ${stateName} metro area. Whether your family is in the city center or a surrounding suburb, our local team is ready to help with every aspect of the senior transition process.`,
+      answer: `We focus on the greater Portland, Oregon and Vancouver, Washington region, including ${cityName} and nearby suburbs we already serve. If you are unsure whether your address is in range, call (503) 755-8555 and we will confirm quickly.`,
     },
   ];
 
@@ -109,8 +105,8 @@ export default async function CityPage({ params }: PageProps) {
             Compassionate, expert guidance for seniors and families navigating
             life&apos;s biggest housing transitions in the {cityName} area.
           </p>
-          <Link href="/contact" className="btn-primary text-lg">
-            Schedule a Free Consultation
+          <Link href="/free-family-consultation" className="btn-primary text-lg">
+            Free Family Consultation
           </Link>
         </div>
       </section>
@@ -125,16 +121,28 @@ export default async function CityPage({ params }: PageProps) {
             When a senior loved one needs to move — whether it&apos;s
             downsizing, relocating to assisted living, or clearing a family
             estate — the process can feel overwhelming. Senior Transitions Group
-            brings trusted, local expertise to {cityName} families who need
-            support during these pivotal moments.
+            brings hands-on transition support to {cityName} families as part of
+            our <strong>Portland–Vancouver metropolitan service area</strong>.
+            We are not a national call center; we coordinate moves and placement
+            in the communities we know well.
           </p>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Our {cityName}-based team coordinates every detail: from finding the
-            right senior living community to sorting, packing, and managing the
-            physical move. We partner with local real estate agents, estate sale
-            professionals, and senior care advisors across {stateName} to
-            deliver a seamless experience.
+            From our Portland–Vancouver team, we coordinate placement tours,
+            downsizing, home transition planning, packing, and move day logistics
+            for {cityName} and neighboring suburbs. We partner with trusted local
+            real estate professionals, estate resources, and care advisors in
+            this region to keep your family on one clear path.
           </p>
+          {localInsight ? (
+            <div className="mt-8 p-6 bg-muted rounded-lg border border-navy/10">
+              <h3 className="font-serif text-xl text-navy mb-3">
+                Local insight: {cityName}
+              </h3>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                {localInsight}
+              </p>
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -215,9 +223,9 @@ export default async function CityPage({ params }: PageProps) {
                 Move Management
               </h3>
               <p className="text-muted-foreground">
-                Our certified senior move managers in {cityName} handle packing,
-                logistics, unpacking, and setup — creating a smooth transition
-                that reduces stress for the entire family.
+                Our move managers serving {cityName} handle packing, logistics,
+                unpacking, and setup — creating a smooth transition that reduces
+                stress for the entire family.
               </p>
             </div>
           </div>
@@ -349,8 +357,8 @@ export default async function CityPage({ params }: PageProps) {
           <p className="text-lg text-white/80 mb-8">
             Are you a senior living community, real estate agent, elder law
             attorney, or home care provider in {cityName}? We&apos;re building a
-            trusted referral network across {stateName} and would love to
-            connect.
+            trusted referral network in the Portland–Vancouver metro and would
+            love to connect.
           </p>
           <Link href="/partner-with-us" className="btn-outline text-lg">
             Learn About Partnership
@@ -408,10 +416,10 @@ export default async function CityPage({ params }: PageProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/free-family-consultation"
               className="bg-white text-coral font-bold py-3 px-8 rounded-lg hover:bg-white/90 transition-colors text-lg"
             >
-              Schedule Consultation
+              Free Family Consultation
             </Link>
             <a
               href="tel:+15037558555"

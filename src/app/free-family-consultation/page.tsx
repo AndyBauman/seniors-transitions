@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Heart, Shield, Clock, Send, Phone } from "lucide-react";
+import { LEAD_ERROR_MESSAGE, submitLead } from "@/lib/submit-lead";
 
 const reassurances = [
   {
@@ -30,13 +31,26 @@ export default function FreeFamilyConsultationPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setSubmitFailed(false);
+
+    const ok = await submitLead({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      type: "family",
+      notes: [formData.situation, "[Free Family Consultation Request]"]
+        .filter(Boolean)
+        .join("\n"),
+    });
+
     setIsSubmitting(false);
-    setIsSubmitted(true);
+    if (ok) setIsSubmitted(true);
+    else setSubmitFailed(true);
   };
 
   const handleChange = (
@@ -223,6 +237,12 @@ export default function FreeFamilyConsultationPage() {
                         ? "Sending..."
                         : "Request Free Consultation"}
                     </button>
+
+                    {submitFailed && (
+                      <p role="alert" className="text-sm text-red-700 text-center">
+                        {LEAD_ERROR_MESSAGE}
+                      </p>
+                    )}
 
                     <p className="text-xs text-muted-foreground text-center">
                       Your information is confidential. We&apos;ll never share

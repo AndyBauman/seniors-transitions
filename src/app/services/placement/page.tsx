@@ -63,14 +63,38 @@ export default function PlacementServicesPage() {
               <Users className="h-8 w-8 text-coral" />
             </div>
             <h1 className="font-serif text-4xl md:text-5xl font-medium italic mb-6">
-              Placement Services
+              Senior Living Placement
             </h1>
-            <p className="text-lg text-white/80">
-              We guide seniors and families through life&apos;s most significant
-              housing changes with expertise, compassion, and unwavering
-              support.
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
+              Portland–Vancouver metro: we match care needs, budget, and
+              community fit—then support tours and move-in timing. Placement
+              guidance is <strong>at no cost to qualifying families</strong>;
+              we explain how we are paid before you proceed.
             </p>
+            <Link
+              href="/free-family-consultation"
+              className="btn-primary inline-block mt-8"
+            >
+              Free Family Consultation
+            </Link>
           </div>
+        </div>
+      </section>
+
+      <section className="bg-white border-b border-navy/10">
+        <div className="container-custom section-padding max-w-4xl">
+          <h2 className="font-serif text-2xl md:text-3xl text-navy mb-4">
+            What is senior living placement?
+          </h2>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            <strong>Placement</strong> means helping your loved one find the
+            right level of care—assisted living, memory care, independent
+            living, or skilled nursing—based on clinical needs, social
+            preferences, location, and budget, then coordinating tours and
+            move-in logistics. Communities compensate the advisor for
+            qualifying placements, similar to how many referral-based models
+            work; we confirm fees and representation in writing.
+          </p>
         </div>
       </section>
 
@@ -200,7 +224,7 @@ export default function PlacementServicesPage() {
               Schedule a free consultation to discuss your family&apos;s needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
+              <Link href="/free-family-consultation" className="btn-primary">
                 Schedule Consultation
               </Link>
               <Link

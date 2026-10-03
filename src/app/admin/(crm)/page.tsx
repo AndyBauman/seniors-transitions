@@ -133,9 +133,10 @@ export default function AdminDashboard() {
           <div className="space-y-3 min-w-0">
             {(Object.keys(STAGE_LABELS) as Array<keyof typeof STAGE_LABELS>).map(
               (stage) => (
-                <div
+                <Link
                   key={stage}
-                  className="flex flex-col gap-2 min-w-0 sm:flex-row sm:items-center sm:gap-3"
+                  href={`/admin/contacts?stage=${stage}`}
+                  className="flex flex-col gap-2 min-w-0 sm:flex-row sm:items-center sm:gap-3 rounded p-2 -mx-2 hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
@@ -156,7 +157,7 @@ export default function AdminDashboard() {
                       }}
                     />
                   </div>
-                </div>
+                </Link>
               )
             )}
           </div>
@@ -235,9 +236,10 @@ export default function AdminDashboard() {
               {[...overdueTasks, ...todayTasks, ...upcomingTasks]
                 .slice(0, 5)
                 .map((task) => (
-                  <div
+                  <Link
                     key={task.id}
-                    className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 rounded bg-[#0f1419] min-w-0"
+                    href="/admin/tasks"
+                    className="flex items-start sm:items-center gap-2 sm:gap-3 p-3 rounded bg-[#0f1419] hover:bg-white/5 transition-colors min-w-0"
                   >
                     <div
                       className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 sm:mt-0 ${
@@ -268,7 +270,7 @@ export default function AdminDashboard() {
                           ? "Today"
                           : task.dueDate}
                     </span>
-                  </div>
+                  </Link>
                 ))}
             </div>
           )}

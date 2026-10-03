@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  ResourceArticleExtras,
+  PnwOfficialResourcesBox,
+} from "@/components/ResourceArticleExtras";
 
 export const metadata = {
   title: "How to Help Your Parent Downsize: A Complete Guide | Senior Transitions Group",
@@ -33,6 +37,12 @@ export default function HowToHelpParentDownsizePage() {
       <section className="bg-white">
         <div className="container-custom section-padding">
           <div className="max-w-3xl mx-auto">
+            <ResourceArticleExtras
+              headline="How to Help Your Parent Downsize: A Complete Guide"
+              description="Step-by-step guidance for adult children: emotional preparation, the conversation, sorting, professionals, and family dynamics."
+              path="/resources/how-to-help-parent-downsize"
+              bottomLine="Lead with empathy and a clear timeline—agree on what stays, what goes, and who decides before you touch boxes, and bring in professional help when siblings disagree or the house is too large to finish alone."
+            />
             <div className="space-y-8 text-muted-foreground leading-relaxed">
               <p className="text-lg">
                 Helping a parent downsize is rarely just about packing boxes. It&apos;s about navigating decades of memories, managing complicated family emotions, and supporting someone through a major life transition&mdash;all while handling the logistics of sorting, selling, donating, and moving. If you&apos;re feeling overwhelmed before you even start, you&apos;re not alone. Nearly every adult child who goes through this process describes it as one of the hardest things they&apos;ve done.
@@ -192,6 +202,8 @@ export default function HowToHelpParentDownsizePage() {
                   <li>Consider bringing in a mediator&mdash;a family counselor, a senior move manager, or even a trusted family friend&mdash;if conversations are consistently unproductive.</li>
                 </ul>
               </div>
+
+              <PnwOfficialResourcesBox />
             </div>
           </div>
         </div>
@@ -257,8 +269,8 @@ export default function HowToHelpParentDownsizePage() {
               Our transition specialists help families sort, pack, coordinate moves, and set up new living spaces. We handle the logistics so you can focus on supporting your parent. Schedule a free consultation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary">
-                Schedule Consultation
+              <Link href="/free-family-consultation" className="btn-primary">
+                Free Family Consultation
               </Link>
               <a
                 href="tel:5037558555"
